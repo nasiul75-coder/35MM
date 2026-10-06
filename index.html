@@ -35,7 +35,6 @@
     .media-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
     .media-card img { width: 100%; height: 300px; object-fit: cover; }
 
-    /* Netflix Auto-Play Carousel CSS */
     .carousel-container { position: relative; width: 100%; height: 80vh; overflow: hidden; background: #000; }
     .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
     .carousel-slide.active { opacity: 1; z-index: 1; }
@@ -43,7 +42,7 @@
     .hero-content { position: relative; z-index: 3; padding: 50px 5%; max-width: 800px; }
     
     .video-background { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; z-index: 1; pointer-events: none; border: none; }
-    .fallback-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; transition: opacity 1s; }
+    .fallback-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
 
     .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
     .carousel-btn:hover { background: var(--primary); color: black; }
@@ -135,32 +134,19 @@
     const formatData = (item, type) => {
       let finalType = item.media_type || type;
       if (finalType === 'tv') finalType = 'series'; 
-      
-      // FEATURE: PERSON FORMATTING FOR SEARCH
       if (finalType === 'person') {
         return {
-          id: item.id,
-          title: item.name,
-          year: item.known_for_department,
-          rating: '⭐ STAR',
-          votes: 999,
+          id: item.id, title: item.name, year: item.known_for_department, rating: '⭐ STAR', votes: 999,
           image: item.profile_path ? PROFILE_URL + item.profile_path : 'https://via.placeholder.com/500x750?text=No+Photo',
-          backdrop: '',
-          synopsis: 'Click to view full profile and known works.',
-          type: 'person'
+          backdrop: '', synopsis: 'Click to view full profile and known works.', type: 'person'
         };
       }
-
       return {
-        id: item.id,
-        title: item.title || item.name,
-        year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4),
-        rating: item.vote_average ? item.vote_average.toFixed(1) : '0.0',
-        votes: item.vote_count || 0, 
+        id: item.id, title: item.title || item.name, year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4),
+        rating: item.vote_average ? item.vote_average.toFixed(1) : '0.0', votes: item.vote_count || 0, 
         image: item.poster_path ? IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster',
         backdrop: item.backdrop_path ? BACKDROP_URL + item.backdrop_path : '',
-        synopsis: item.overview || 'No synopsis available.',
-        type: finalType
+        synopsis: item.overview || 'No synopsis available.', type: finalType
       };
     };
 
@@ -173,7 +159,6 @@
       const [trendingMovies, setTrendingMovies] = useState([]);
       const [trendingSeries, setTrendingSeries] = useState([]);
       const [topRated, setTopRated] = useState([]);
-      
       const [nowPlaying, setNowPlaying] = useState([]);
       const [upcoming, setUpcoming] = useState([]);
       const [topSeries, setTopSeries] = useState([]);
@@ -182,77 +167,44 @@
       const [genreResults, setGenreResults] = useState([]);
       const [activeGenreName, setActiveGenreName] = useState('');
 
-      // LOGIN FEATURE STATE
       const [user, setUser] = useState(null);
       const [showLogin, setShowLogin] = useState(false);
 
       useEffect(() => {
         const savedList = localStorage.getItem('35mm_watchlist');
         if (savedList) setWatchlist(JSON.parse(savedList));
-
         const savedUser = localStorage.getItem('35mm_user');
         if (savedUser) setUser(savedUser);
 
-        fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`)
-          .then(r => r.json())
-          .then(data => setTrendingMovies(data.results.map(m => formatData(m, 'movie'))));
-
-        fetch(`${BASE_URL}/trending/tv/day?api_key=${API_KEY}`)
-          .then(r => r.json())
-          .then(data => setTrendingSeries(data.results.map(s => formatData(s, 'series'))));
-
-        fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}`)
-          .then(r => r.json())
-          .then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
-          
-        fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`)
-          .then(r => r.json())
-          .then(data => setNowPlaying(data.results.map(m => formatData(m, 'movie'))));
-
-        fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`)
-          .then(r => r.json())
-          .then(data => setUpcoming(data.results.map(m => formatData(m, 'movie'))));
-
-        fetch(`${BASE_URL}/tv/top_rated?api_key=${API_KEY}`)
-          .then(r => r.json())
-          .then(data => setTopSeries(data.results.map(s => formatData(s, 'series'))));
+        fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`).then(r => r.json()).then(data => setTrendingMovies(data.results.map(m => formatData(m, 'movie'))));
+        fetch(`${BASE_URL}/trending/tv/day?api_key=${API_KEY}`).then(r => r.json()).then(data => setTrendingSeries(data.results.map(s => formatData(s, 'series'))));
+        fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}`).then(r => r.json()).then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
+        fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`).then(r => r.json()).then(data => setNowPlaying(data.results.map(m => formatData(m, 'movie'))));
+        fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`).then(r => r.json()).then(data => setUpcoming(data.results.map(m => formatData(m, 'movie'))));
+        fetch(`${BASE_URL}/tv/top_rated?api_key=${API_KEY}`).then(r => r.json()).then(data => setTopSeries(data.results.map(s => formatData(s, 'series'))));
       }, []);
 
-      const nav = (path, item = null) => { 
-        setRoute(path); 
-        setSelectedItem(item); 
-        setSearchQuery(''); 
-        window.scrollTo(0, 0); 
-      };
+      const nav = (path, item = null) => { setRoute(path); setSelectedItem(item); setSearchQuery(''); window.scrollTo(0, 0); };
 
       const handleSearch = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
         if (query.length > 2) {
           fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${query}`)
-            .then(r => r.json())
-            .then(data => {
-              // FEATURE: ADDED 'PERSON' TO SEARCH RESULTS
+            .then(r => r.json()).then(data => {
               const filtered = data.results.filter(i => i.media_type === 'movie' || i.media_type === 'tv' || i.media_type === 'person');
               setSearchResults(filtered.map(item => formatData(item, item.media_type)));
             });
-        } else {
-          setSearchResults([]);
-        }
+        } else setSearchResults([]);
       };
 
       const handleGenreClick = (genre) => {
         fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genre.id}&sort_by=popularity.desc`)
-          .then(r => r.json())
-          .then(data => {
-            setGenreResults(data.results.map(m => formatData(m, 'movie')));
-            setActiveGenreName(genre.name);
-            nav('/genre');
-          });
+          .then(r => r.json()).then(data => { setGenreResults(data.results.map(m => formatData(m, 'movie'))); setActiveGenreName(genre.name); nav('/genre'); });
       };
 
       const toggleWatchlist = (item) => {
-        if (!user) { setShowLogin(true); return; } // Prompt login if not signed in
+        if (!user) { setShowLogin(true); return; }
         let updatedList = [...watchlist];
         const exists = updatedList.find(i => i.id === item.id);
         if (exists) updatedList = updatedList.filter(i => i.id !== item.id);
@@ -262,22 +214,13 @@
       };
 
       const handleShare = (item) => {
-        const shareData = {
-          title: `35 MM: ${item.title}`,
-          text: `Check out ${item.title} on 35 MM! Rating: ${item.rating} 🔥`,
-          url: window.location.href
-        };
+        const shareData = { title: `35 MM: ${item.title}`, text: `Check out ${item.title} on 35 MM! Rating: ${item.rating} 🔥`, url: window.location.href };
         if (navigator.share) navigator.share(shareData).catch(err => console.log('Share failed:', err));
         else alert("Link copied! Share it with your friends.");
       };
 
-      const handleLogin = () => {
-        localStorage.setItem('35mm_user', 'Tanvir');
-        setUser('Tanvir');
-        setShowLogin(false);
-      };
+      const handleLogin = () => { localStorage.setItem('35mm_user', 'Tanvir'); setUser('Tanvir'); setShowLogin(false); };
 
-      // FEATURE: PREMIUM LOGIN MODAL
       const LoginModal = () => {
         if (!showLogin) return null;
         return (
@@ -285,7 +228,7 @@
             <div style={{ background: '#111', padding: '40px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center', maxWidth: '400px', width: '90%', boxShadow: '0 20px 40px rgba(0,0,0,0.9)' }}>
               <h2 style={{ color: '#fff', margin: '0 0 10px 0', fontSize: '28px', fontWeight: '900' }}>35<span style={{color: '#FFD700'}}>MM</span> Sync</h2>
               <p style={{ color: '#aaa', marginBottom: '30px' }}>Sign in to safely save your Watchlist and Ratings in the cloud.</p>
-              <button onClick={handleLogin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', width: '100%', padding: '15px', background: '#fff', color: '#000', borderRadius: '8px', border: 'none', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', transition: '0.2s' }}>
+              <button onClick={handleLogin} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px', width: '100%', padding: '15px', background: '#fff', color: '#000', borderRadius: '8px', border: 'none', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>
                  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style={{width: '20px'}} />
                  Continue with Google
               </button>
@@ -295,41 +238,53 @@
         );
       };
 
-      // FEATURE: AUTO-PLAY NETFLIX STYLE HERO CAROUSEL
+      // FIXED AUTO-SLIDER WITH SOUND & NO GLITCH
       const HeroCarousel = ({ items }) => {
         const [currentIndex, setCurrentIndex] = useState(0);
         const [videoKey, setVideoKey] = useState(null);
+        const [isMuted, setIsMuted] = useState(true); // Sound Control State
         const topItems = items ? items.slice(0, 10) : [];
 
         useEffect(() => {
           if (topItems.length === 0) return;
           const timer = setInterval(() => {
-            setCurrentIndex((prev) => (prev + 1) % topItems.length);
-          }, 8000); // 8 seconds to allow trailer viewing
+            setCurrentIndex((prev) => {
+              setIsMuted(true); // Always mute when changing slides
+              return (prev + 1) % topItems.length;
+            });
+          }, 15000); // Increased time to 15 seconds to enjoy trailer
           return () => clearInterval(timer);
         }, [topItems.length]);
 
         useEffect(() => {
+          let isMounted = true;
+          setVideoKey(null);
+          
           if(topItems[currentIndex]){
             const item = topItems[currentIndex];
             const apiType = item.type === 'series' ? 'tv' : 'movie';
-            fetch(`${BASE_URL}/${apiType}/${item.id}/videos?api_key=${API_KEY}`)
-              .then(res => res.json())
-              .then(data => {
-                if (data.results && data.results.length > 0) {
-                  const official = data.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.results[0];
-                  setVideoKey(official.key);
-                } else {
-                  setVideoKey(null);
-                }
-              });
+            
+            // Wait 1 second before fetching to avoid glitchy flashes
+            const delay = setTimeout(() => {
+              fetch(`${BASE_URL}/${apiType}/${item.id}/videos?api_key=${API_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                  if(!isMounted) return;
+                  if (data.results && data.results.length > 0) {
+                    const official = data.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.results[0];
+                    setVideoKey(official.key);
+                  }
+                });
+            }, 1000);
+            
+            return () => { isMounted = false; clearTimeout(delay); };
           }
         }, [currentIndex, items]);
 
         if (topItems.length === 0) return <div className="carousel-container"></div>;
 
-        const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % topItems.length);
-        const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + topItems.length) % topItems.length);
+        const nextSlide = () => { setCurrentIndex((prev) => (prev + 1) % topItems.length); setIsMuted(true); };
+        const prevSlide = () => { setCurrentIndex((prev) => (prev - 1 + topItems.length) % topItems.length); setIsMuted(true); };
 
         return (
           <div className="carousel-container">
@@ -338,17 +293,21 @@
               const isCurrent = idx === currentIndex;
               return (
                 <div key={item.id} className={`carousel-slide ${isCurrent ? 'active' : ''}`}>
-                  <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})`, opacity: (isCurrent && videoKey) ? 0 : 1 }}></div>
                   
+                  {/* Image Fades out smoothly ONLY AFTER video loads */}
+                  <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})`, opacity: (isCurrent && videoKey) ? 0 : 1, transition: 'opacity 2s ease 1.5s' }}></div>
+                  
+                  {/* YouTube Trailer */}
                   {isCurrent && videoKey && (
                     <iframe
                       className="video-background"
-                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`}
+                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`}
                       allow="autoplay; encrypted-media"
                     ></iframe>
                   )}
 
                   <div className="hero-gradient"></div>
+                  
                   {isCurrent && (
                     <div className="hero-content">
                       <div style={{ display: 'inline-block', padding: '5px 12px', border: `1px solid ${r.col}`, background: r.bg, borderRadius: '4px', color: r.col, fontWeight: 'bold', fontSize: '14px', marginBottom: '15px', backdropFilter: 'blur(5px)' }}>
@@ -356,10 +315,21 @@
                       </div>
                       <h1 style={{ fontSize: '48px', margin: '0 0 15px 0', fontWeight: '900', textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}>{item.title}</h1>
                       <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#ddd', textShadow: '1px 1px 5px rgba(0,0,0,0.8)', maxWidth: '600px' }}>{item.synopsis.substring(0, 150)}...</p>
-                      <div style={{ marginTop: '20px' }}>
+                      <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
                         <button onClick={() => nav('/detail', item)} className="action-btn trailer-btn">▶ View Details</button>
                       </div>
                     </div>
+                  )}
+
+                  {/* Sound Toggle Button */}
+                  {isCurrent && videoKey && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} 
+                      style={{ position: 'absolute', bottom: '100px', right: '5%', zIndex: 20, background: 'rgba(0,0,0,0.5)', border: '1px solid #666', color: '#fff', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.3s', backdropFilter: 'blur(5px)' }}
+                      title={isMuted ? "Unmute" : "Mute"}
+                    >
+                      {isMuted ? '🔇' : '🔊'}
+                    </button>
                   )}
                 </div>
               );
@@ -370,7 +340,7 @@
 
             <div className="carousel-indicators">
               {topItems.map((_, idx) => (
-                <div key={idx} className={`indicator ${idx === currentIndex ? 'active' : ''}`} onClick={() => setCurrentIndex(idx)}></div>
+                <div key={idx} className={`indicator ${idx === currentIndex ? 'active' : ''}`} onClick={() => {setCurrentIndex(idx); setIsMuted(true);}}></div>
               ))}
             </div>
           </div>
@@ -420,18 +390,12 @@
         useEffect(() => {
           setActiveSeason(1); 
           setEpisodes([]);
-          
           const savedRate = localStorage.getItem(`35mm_rating_${item.id}`);
           if (savedRate) setMyRating(parseInt(savedRate));
 
-          fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=videos,credits`)
-            .then(res => res.json())
-            .then(data => {
+          fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=videos,credits`).then(res => res.json()).then(data => {
               setDetails(data);
-              if (data.videos?.results?.length > 0) {
-                const official = data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results[0];
-                setTrailer(official.key);
-              }
+              if (data.videos?.results?.length > 0) setTrailer((data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results[0]).key);
               if (data.credits?.cast) setCast(data.credits.cast.slice(0, 10)); 
               if (apiType === 'movie') {
                 const dir = data.credits?.crew?.find(c => c.job === 'Director');
@@ -442,25 +406,19 @@
               }
             });
 
-          fetch(`${BASE_URL}/${apiType}/${item.id}/watch/providers?api_key=${API_KEY}`)
-            .then(res => res.json())
-            .then(data => {
+          fetch(`${BASE_URL}/${apiType}/${item.id}/watch/providers?api_key=${API_KEY}`).then(res => res.json()).then(data => {
               if (data.results && data.results.IN) setProviders(data.results.IN);
               else if (data.results && data.results.US) setProviders(data.results.US);
             });
             
-          fetch(`${BASE_URL}/${apiType}/${item.id}/similar?api_key=${API_KEY}`)
-            .then(res => res.json())
-            .then(data => {
+          fetch(`${BASE_URL}/${apiType}/${item.id}/similar?api_key=${API_KEY}`).then(res => res.json()).then(data => {
               if(data.results) setSimilar(data.results.map(m => formatData(m, apiType)));
             });
         }, [item]);
 
         useEffect(() => {
           if (apiType === 'tv') {
-            fetch(`${BASE_URL}/tv/${item.id}/season/${activeSeason}?api_key=${API_KEY}`)
-              .then(res => res.json())
-              .then(data => { 
+            fetch(`${BASE_URL}/tv/${item.id}/season/${activeSeason}?api_key=${API_KEY}`).then(res => res.json()).then(data => { 
                 if(data.episodes) setEpisodes(data.episodes); 
                 else setEpisodes([]);
               });
@@ -473,8 +431,7 @@
           if(providers.flatrate) allProviders.push(...providers.flatrate);
           if(providers.rent) allProviders.push(...providers.rent);
           if(providers.buy) allProviders.push(...providers.buy);
-          const uniqueProviders = Array.from(new Set(allProviders.map(a => a.provider_id)))
-            .map(id => allProviders.find(a => a.provider_id === id));
+          const uniqueProviders = Array.from(new Set(allProviders.map(a => a.provider_id))).map(id => allProviders.find(a => a.provider_id === id));
           if (uniqueProviders.length === 0) return null;
           return (
             <div style={{ marginBottom: '30px' }}>
@@ -495,10 +452,8 @@
           <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
             <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-              
               <div style={{ width: '100%', maxWidth: '350px' }}>
                 <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', marginBottom: '20px' }} />
-                
                 <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center' }}>
                   <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#aaa' }}>Rate this {item.type}</h3>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
@@ -513,7 +468,6 @@
               <div style={{ flex: 1, minWidth: '300px' }}>
                 <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
                 <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()}</p>
-                
                 {awardText && <p style={{ color: '#FFD700', fontSize: '16px', fontWeight: 'bold', marginBottom: '20px' }}>{awardText}</p>}
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px', flexWrap: 'wrap' }}>
@@ -521,13 +475,8 @@
                     <div style={{ fontSize: '30px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
                     <div style={{ fontSize: '10px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '5px', textAlign: 'center' }}>{r.cat}</div>
                   </div>
-                  
                   {trailer && <a href={`https://www.youtube.com/watch?v=${trailer}`} target="_blank" rel="noreferrer" className="action-btn trailer-btn">▶ Trailer</a>}
-                  
-                  <button onClick={() => toggleWatchlist(item)} className="action-btn watchlist-btn">
-                    {inWatchlist ? '✓ In Watchlist' : '+ Watchlist'}
-                  </button>
-
+                  <button onClick={() => toggleWatchlist(item)} className="action-btn watchlist-btn">{inWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
                   <button onClick={() => handleShare(item)} className="action-btn share-btn">📤 Share</button>
                 </div>
                 
@@ -554,19 +503,11 @@
             {apiType === 'tv' && details && details.seasons && details.seasons.filter(s => s.season_number > 0).length > 0 && (
               <div style={{ marginTop: '50px', padding: '30px', background: '#0a0a0a', borderRadius: '16px', border: '1px solid #222' }}>
                 <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: '0 0 20px 0'}}>Seasons & Episodes</h2>
-                
                 <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', borderBottom: '1px solid #222', marginBottom: '20px' }}>
                   {details.seasons.filter(s => s.season_number > 0).map(s => (
-                    <button 
-                      key={s.season_number} 
-                      onClick={() => setActiveSeason(s.season_number)}
-                      className={`season-btn ${activeSeason === s.season_number ? 'active' : ''}`}
-                    >
-                      Season {s.season_number}
-                    </button>
+                    <button key={s.season_number} onClick={() => setActiveSeason(s.season_number)} className={`season-btn ${activeSeason === s.season_number ? 'active' : ''}`}>Season {s.season_number}</button>
                   ))}
                 </div>
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                   {episodes.length === 0 ? <p style={{color: '#888'}}>Loading episodes...</p> : episodes.map(ep => {
                     const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
@@ -605,8 +546,7 @@
 
         useEffect(() => {
           fetch(`${BASE_URL}/person/${personId}?api_key=${API_KEY}&append_to_response=combined_credits`)
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.json()).then(data => {
               setPerson(data);
               let movies = data.combined_credits?.cast || [];
               if (movies.length === 0) movies = data.combined_credits?.crew || [];
@@ -733,7 +673,6 @@
                 <button onClick={() => nav('/')} className="nav-btn">Home</button>
                 <button onClick={() => nav('/watchlist')} style={{...navBtn, color: '#FFD700'}}>My List</button>
                 
-                {/* PREMIUM USER LOGIN UI */}
                 {user ? (
                   <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', border: '2px solid #FFD700', borderRadius: '50%', padding: '2px' }} onClick={() => { if(window.confirm('Sign out?')) { localStorage.removeItem('35mm_user'); setUser(null); } }} title="Sign Out">
                     <img src="https://ui-avatars.com/api/?name=Tanvir+Hossain&background=FFD700&color=000&bold=true" style={{ width: '32px', borderRadius: '50%' }} alt="User" />

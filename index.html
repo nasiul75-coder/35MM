@@ -23,16 +23,28 @@
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
 
-    /* SPLASH SCREEN ANIMATION */
-    .splash-screen { position: fixed; inset: 0; background: #050505; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOutSplash 0.5s ease 2.5s forwards; }
-    .splash-logo { font-size: 80px; font-weight: 900; letter-spacing: 8px; color: #fff; text-shadow: 0 10px 30px rgba(255, 215, 0, 0.4); animation: zoomInSplash 2s ease-out forwards; }
-    .splash-logo span { color: var(--primary); }
-    .splash-subtitle { color: #888; font-size: 16px; letter-spacing: 5px; margin-top: 15px; font-weight: bold; opacity: 0; animation: fadeInText 1s ease 1s forwards; }
+    /* NEW CINEMATIC FILM SPLASH SCREEN */
+    .splash-screen { position: fixed; inset: 0; background: #020202; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOutSplash 0.8s ease 3s forwards; overflow: hidden; }
     
-    @keyframes zoomInSplash { 0% { transform: scale(0.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.1); opacity: 1; } }
+    /* Film Reel Lines / Vignette */
+    .splash-screen::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0) 100%); background-size: 100% 4px; pointer-events: none; z-index: 2; animation: scrollLines 0.5s linear infinite; }
+    .splash-screen::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,1) 100%); z-index: 3; pointer-events: none; }
+
+    .splash-content { position: relative; z-index: 4; display: flex; flex-direction: column; align-items: center; }
+
+    /* Classic Movie Title Font with Focus Blur & Flicker */
+    .splash-logo { font-size: 85px; font-weight: normal; font-family: 'Georgia', 'Times New Roman', serif; letter-spacing: 20px; color: #e0e0e0; text-shadow: 0 0 15px rgba(255,255,255,0.2); animation: cinematicFocus 3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, projectorFlicker 0.15s infinite; text-transform: uppercase; margin-left: 20px; }
+    .splash-logo span { color: #e0e0e0; font-weight: normal; } /* NO YELLOW COLOR HERE */
+    
+    .splash-subtitle { color: #888; font-size: 14px; letter-spacing: 10px; margin-top: 25px; opacity: 0; animation: fadeInText 1.5s ease 1s forwards; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+
+    @keyframes cinematicFocus { 0% { transform: scale(1.5); filter: blur(15px); opacity: 0; } 100% { transform: scale(1); filter: blur(0); opacity: 1; } }
+    @keyframes projectorFlicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; text-shadow: 0 0 25px rgba(255,255,255,0.5); } }
     @keyframes fadeInText { to { opacity: 1; } }
     @keyframes fadeOutSplash { to { opacity: 0; visibility: hidden; } }
+    @keyframes scrollLines { 0% { background-position: 0 0; } 100% { background-position: 0 10px; } }
 
+    /* REST OF THE WEBSITE CSS (UNCHANGED) */
     .nav-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; font-weight: 600; transition: 0.2s; }
     .nav-btn:hover { color: #fff; }
 
@@ -92,7 +104,6 @@
     .season-btn:hover { background: #333; }
     .season-btn.active { background: #FFD700; color: #000; border-color: #FFD700; }
 
-    /* REVIEW BOX CSS */
     .review-textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; outline: none; transition: 0.3s; }
     .review-textarea:focus { border-color: #FFD700; }
     .save-review-btn { background: #FFD700; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; }
@@ -169,7 +180,6 @@
     };
 
     function App() {
-      // NEW STATE FOR SPLASH SCREEN
       const [showSplash, setShowSplash] = useState(true);
 
       const [route, setRoute] = useState('/');
@@ -192,10 +202,9 @@
       const [showLogin, setShowLogin] = useState(false);
 
       useEffect(() => {
-        // REMOVE SPLASH SCREEN AFTER 3 SECONDS
         const splashTimer = setTimeout(() => {
           setShowSplash(false);
-        }, 3000);
+        }, 3500); // 3.5 sec gives perfect time for the animation
 
         const savedList = localStorage.getItem('35mm_watchlist');
         if (savedList) setWatchlist(JSON.parse(savedList));
@@ -387,7 +396,6 @@
         const [details, setDetails] = useState(null);
         const [activeSeason, setActiveSeason] = useState(1);
         
-        // REVIEWS FEATURE STATES
         const [myReviewText, setMyReviewText] = useState("");
         const [savedReview, setSavedReview] = useState(null);
         
@@ -403,7 +411,6 @@
           const savedRate = localStorage.getItem(`35mm_rating_${item.id}`);
           if (savedRate) setMyRating(parseInt(savedRate));
           
-          // LOAD SAVED REVIEW
           const storedReview = localStorage.getItem(`35mm_review_${item.id}`);
           if (storedReview) setSavedReview(storedReview);
           else setSavedReview(null);
@@ -479,7 +486,6 @@
               <div style={{ width: '100%', maxWidth: '350px' }}>
                 <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', marginBottom: '20px' }} />
                 
-                {/* RATING & REVIEWS BOX */}
                 <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center' }}>
                   <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#aaa' }}>Rate this {item.type}</h3>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
@@ -489,7 +495,6 @@
                   </div>
                   {myRating > 0 && <p style={{ margin: '10px 0 0 0', color: '#FFD700', fontWeight: 'bold', fontSize: '14px' }}>You rated this {myRating} / 10</p>}
                   
-                  {/* WRITTEN REVIEW SECTION */}
                   <div style={{ marginTop: '20px', borderTop: '1px solid #333', paddingTop: '15px' }}>
                     <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#aaa', textAlign: 'left' }}>Your Review</h3>
                     {savedReview ? (
@@ -499,17 +504,11 @@
                       </div>
                     ) : (
                       <>
-                        <textarea 
-                          className="review-textarea" 
-                          placeholder="Write your thoughts..." 
-                          value={myReviewText} 
-                          onChange={(e) => setMyReviewText(e.target.value)}
-                        />
+                        <textarea className="review-textarea" placeholder="Write your thoughts..." value={myReviewText} onChange={(e) => setMyReviewText(e.target.value)} />
                         <button className="save-review-btn" onClick={handleSaveReview}>Save Review</button>
                       </>
                     )}
                   </div>
-
                 </div>
               </div>
 
@@ -710,11 +709,12 @@
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           
-          {/* WELCOME ANIMATION SCREEN */}
           {showSplash && (
             <div className="splash-screen">
-              <div className="splash-logo">35<span>MM</span></div>
-              <div className="splash-subtitle">BY TANVIR HOSSAIN</div>
+              <div className="splash-content">
+                <div className="splash-logo">35<span>MM</span></div>
+                <div className="splash-subtitle">By Tanvir Hossain</div>
+              </div>
             </div>
           )}
 

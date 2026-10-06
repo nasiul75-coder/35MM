@@ -7,26 +7,36 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
-    :root { --bg: #050505; --surface: #121212; --primary: #FFD700; --text: #ffffff; --text-muted: #a0a0a0; }
-    body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-    * { box-sizing: border-box; transition: all 0.2s ease; }
-    input, textarea, select { width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 8px; margin-bottom: 15px; font-family: inherit; }
-    input:focus, textarea:focus { outline: none; border-color: var(--primary); }
-    button { cursor: pointer; font-family: inherit; }
-    button:active { transform: scale(0.98); }
+    :root { --bg: #050505; --surface: #121212; --primary: #FFD700; --text: #ffffff; }
+    body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    * { box-sizing: border-box; }
     
-    /* Cinematic Card Hover */
-    .movie-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.8); border-color: #444; }
-    .movie-card img { transition: transform 0.5s ease; }
-    .movie-card:hover img { transform: scale(1.05); }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
+    /* Smooth Netflix-style scrollbars */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    .nav-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; font-weight: 600; transition: 0.2s; }
+    .nav-btn:hover { color: #fff; }
+
+    /* Media Row Scrolling */
+    .media-row { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5%; scroll-snap-type: x mandatory; padding-bottom: 20px; }
+    .media-card { flex: 0 0 200px; scroll-snap-align: start; background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #222; position: relative; transition: transform 0.3s; }
+    .media-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
+    .media-card img { width: 100%; height: 300px; object-fit: cover; }
+
+    /* Hero Banner Gradient */
+    .hero-banner { position: relative; width: 100%; height: 75vh; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+    .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.8) 30%, transparent 100%); }
+    .hero-content { position: relative; z-index: 2; padding: 50px 5%; max-width: 800px; }
+
+    /* Episode Row */
+    .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; }
+    .episode-card img { width: 120px; height: 70px; object-fit: cover; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -35,6 +45,13 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
+    // TMDB API Details
+    const API_KEY = "7b9a12af809f78ea58b825ed3090934a";
+    const BASE_URL = "https://api.themoviedb.org/3";
+    const IMG_URL = "https://image.tmdb.org/t/p/w500";
+    const BACKDROP_URL = "https://image.tmdb.org/t/p/original";
+
+    // 35 MM Custom Rating System
     const getRatingData = (score) => {
       const num = parseFloat(score);
       if (num >= 9.5) return { cat: 'ABSOLUTE CINEMA', col: '#FFD700', bg: 'rgba(255, 215, 0, 0.15)' };
@@ -45,54 +62,99 @@
       return { cat: 'ABSOLUTE TRASH', col: '#FF0000', bg: 'rgba(255, 0, 0, 0.15)' };
     };
 
+    // Helper to format TMDB data cleanly
+    const formatData = (item, type) => ({
+      id: item.id,
+      title: item.title || item.name,
+      year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4),
+      rating: item.vote_average ? item.vote_average.toFixed(1) : '0.0',
+      image: item.poster_path ? IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster',
+      backdrop: item.backdrop_path ? BACKDROP_URL + item.backdrop_path : '',
+      synopsis: item.overview || 'No synopsis available.',
+      type: item.media_type || type
+    });
+
     function App() {
       const [route, setRoute] = useState('/');
       const [selectedItem, setSelectedItem] = useState(null);
-      const [user, setUser] = useState(null);
-      const [isAdmin, setIsAdmin] = useState(false);
       
-      const [movies, setMovies] = useState([
-        { id: '1', title: 'The Silent Echo', rating: 9.8, year: 2024, type: 'movie', image: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=800&q=80', synopsis: 'A visual masterpiece exploring sound and silence in a dystopian future.' },
-        { id: '2', title: 'Neon Shadows', rating: 7.2, year: 2023, type: 'movie', image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80', synopsis: 'A gritty cyberpunk detective story set in 2084.' },
-      ]);
-      const [series, setSeries] = useState([
-        { id: '101', title: 'Dark Matter', rating: 9.1, year: 2025, type: 'series', image: 'https://images.unsplash.com/photo-1505686994434-e3f942ce5684?auto=format&fit=crop&w=800&q=80', synopsis: 'Space exploration goes terribly wrong when a crew finds an abandoned ship.' },
-      ]);
+      const [trendingMovies, setTrendingMovies] = useState([]);
+      const [trendingSeries, setTrendingSeries] = useState([]);
+      const [topRated, setTopRated] = useState([]);
+      const [heroItem, setHeroItem] = useState(null);
 
       const nav = (path, item = null) => { setRoute(path); setSelectedItem(item); window.scrollTo(0, 0); };
 
+      // Fetch Global Data on Load
+      useEffect(() => {
+        // Fetch Trending Movies
+        fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`)
+          .then(r => r.json())
+          .then(data => {
+            const formatted = data.results.map(m => formatData(m, 'movie'));
+            setTrendingMovies(formatted);
+            setHeroItem(formatted[0]); // Set Hero Banner
+          });
+
+        // Fetch Trending Series
+        fetch(`${BASE_URL}/trending/tv/day?api_key=${API_KEY}`)
+          .then(r => r.json())
+          .then(data => setTrendingSeries(data.results.map(s => formatData(s, 'series'))));
+
+        // Fetch Top Rated
+        fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}`)
+          .then(r => r.json())
+          .then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
+      }, []);
+
       const Navbar = () => (
-        <nav style={{ padding: '20px 5%', background: 'rgba(5,5,5,0.9)', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222', position: 'sticky', top: 0, zIndex: 100 }}>
-          <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '2px', cursor: 'pointer', color: '#fff' }} onClick={() => nav('/')}>
+        <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }} onClick={() => nav('/')}>
             35<span style={{color: '#FFD700'}}>MM</span>
           </div>
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <button onClick={() => nav('/')} style={navBtn}>Home</button>
-            <button onClick={() => nav('/movies')} style={navBtn}>Movies</button>
-            <button onClick={() => nav('/series')} style={navBtn}>Series</button>
-            {user ? <button onClick={() => setUser(null)} style={navBtn}>Logout</button> : <button onClick={() => nav('/login')} style={{...navBtn, color: '#FFD700', border: '1px solid #FFD700', padding: '8px 16px', borderRadius: '20px'}}>Login</button>}
-            <button onClick={() => nav('/admin-login')} style={{...navBtn, color: '#FF4444'}}>Admin</button>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <button onClick={() => nav('/')} className="nav-btn">Home</button>
+            <button onClick={() => nav('/')} className="nav-btn">Movies</button>
+            <button onClick={() => nav('/')} className="nav-btn">Series</button>
           </div>
         </nav>
       );
 
-      const MediaGrid = ({ title, items }) => (
-        <div style={{ padding: '40px 5%' }}>
-          <h2 style={{ fontSize: '28px', marginBottom: '30px', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '15px' }}>{title}</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '25px' }}>
+      const HeroBanner = () => {
+        if (!heroItem) return null;
+        const r = getRatingData(heroItem.rating);
+        return (
+          <div className="hero-banner" style={{ backgroundImage: `url(${heroItem.backdrop || heroItem.image})` }}>
+            <div className="hero-gradient"></div>
+            <div className="hero-content">
+              <div style={{ display: 'inline-block', padding: '5px 12px', border: `1px solid ${r.col}`, background: r.bg, borderRadius: '4px', color: r.col, fontWeight: 'bold', fontSize: '14px', marginBottom: '15px' }}>
+                {heroItem.rating} • {r.cat}
+              </div>
+              <h1 style={{ fontSize: '56px', margin: '0 0 15px 0', fontWeight: '900', textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}>{heroItem.title}</h1>
+              <p style={{ fontSize: '18px', lineHeight: '1.6', color: '#ddd', textShadow: '1px 1px 5px rgba(0,0,0,0.8)', maxWidth: '600px' }}>{heroItem.synopsis.substring(0, 150)}...</p>
+              <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
+                <button onClick={() => nav('/detail', heroItem)} style={{ padding: '12px 30px', background: '#FFD700', color: '#000', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold' }}>▶ Play Details</button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      const MediaRow = ({ title, items }) => (
+        <div style={{ marginTop: '20px' }}>
+          <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>{title}</h2>
+          <div className="media-row">
             {items.map(item => {
               const r = getRatingData(item.rating);
               return (
-                <div key={item.id} className="movie-card" onClick={() => nav('/detail', item)} style={{ background: '#111', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', border: '1px solid #222', position: 'relative' }}>
+                <div key={item.id} className="media-card" onClick={() => nav('/detail', item)}>
                   <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, backdropFilter: 'blur(5px)' }}>
                     {item.rating}
                   </div>
-                  <div style={{ overflow: 'hidden', height: '320px' }}>
-                    <img src={item.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div style={{ padding: '20px' }}>
-                    <h3 style={{ margin: '0 0 5px 0', fontSize: '18px', fontWeight: '600' }}>{item.title}</h3>
-                    <p style={{ margin: 0, color: '#888', fontSize: '14px' }}>{item.year} • {item.type.toUpperCase()}</p>
+                  <img src={item.image} alt={item.title} />
+                  <div style={{ padding: '15px' }}>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3>
+                    <p style={{ margin: 0, color: '#888', fontSize: '12px' }}>{item.year} • {item.type.toUpperCase()}</p>
                   </div>
                 </div>
               );
@@ -102,145 +164,86 @@
       );
 
       const ItemDetail = ({ item }) => {
+        const [episodes, setEpisodes] = useState([]);
         const r = getRatingData(item.rating);
+
+        // Fetch Episodes if it's a TV Series
+        useEffect(() => {
+          if (item.type === 'tv' || item.type === 'series') {
+            fetch(`${BASE_URL}/tv/${item.id}/season/1?api_key=${API_KEY}`)
+              .then(res => res.json())
+              .then(data => {
+                if(data.episodes) setEpisodes(data.episodes);
+              });
+          }
+        }, [item]);
+
         return (
-          <div style={{ padding: '40px 5%', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
-            <button onClick={() => nav('/')} style={{ ...navBtn, marginBottom: '30px', padding: 0 }}>← Back to Browse</button>
+          <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+            <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back to Browse</button>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
               <img src={item.image} style={{ width: '100%', maxWidth: '350px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
               <div style={{ flex: 1, minWidth: '300px' }}>
                 <h1 style={{ fontSize: '48px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
                 <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '30px' }}>{item.year} • {item.type.toUpperCase()}</p>
                 
-                <div style={{ display: 'inline-block', padding: '20px 30px', border: `1px solid ${r.col}`, background: r.bg, borderRadius: '12px', marginBottom: '30px' }}>
+                <div style={{ display: 'inline-block', padding: '20px 30px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px', marginBottom: '30px' }}>
                   <div style={{ fontSize: '42px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
-                  <div style={{ fontSize: '12px', letterSpacing: '3px', color: r.col, fontWeight: '700', marginTop: '10px' }}>{r.cat}</div>
+                  <div style={{ fontSize: '14px', letterSpacing: '3px', color: r.col, fontWeight: '700', marginTop: '10px' }}>{r.cat}</div>
                 </div>
+                
                 <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
                 <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc' }}>{item.synopsis}</p>
+
+                {/* SHOW EPISODES IF IT'S A SERIES */}
+                {episodes.length > 0 && (
+                  <div style={{ marginTop: '40px' }}>
+                    <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Season 1 Episodes</h3>
+                    {episodes.map(ep => {
+                      const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : 'N/A';
+                      const epRData = getRatingData(epRating);
+                      return (
+                        <div key={ep.id} className="episode-card">
+                          <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} />
+                          <div style={{ flex: 1 }}>
+                            <strong style={{ fontSize: '18px' }}>{ep.episode_number}. {ep.name}</strong>
+                            <p style={{ fontSize: '14px', color: '#aaa', margin: '5px 0' }}>{(ep.overview || "No description.").substring(0, 100)}...</p>
+                          </div>
+                          <div style={{ padding: '8px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '120px' }}>
+                            <div style={{ fontWeight: 'bold', fontSize: '20px' }}>{epRating}</div>
+                            <div style={{ fontSize: '10px', letterSpacing: '1px' }}>{epRData.cat}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         );
       };
 
-      const AdminLogin = () => {
-        const [u, setU] = useState(''); const [p, setP] = useState('');
-        return (
-          <div style={{ minHeight: '80vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ background: '#111', padding: '50px', borderRadius: '16px', width: '100%', maxWidth: '400px', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.8)' }}>
-              <h2 style={{ textAlign: 'center', color: '#FF4444', marginBottom: '30px', letterSpacing: '2px' }}>ADMIN CONSOLE</h2>
-              <input placeholder="Username" value={u} onChange={e=>setU(e.target.value)} />
-              <input type="password" placeholder="Password" value={p} onChange={e=>setP(e.target.value)} />
-              <button onClick={() => { if(u==='TANVIR_HOSSAIN' && p==='IMAGINARY_XD786') {setIsAdmin(true); nav('/admin');} else alert('Access Denied'); }} style={{ width: '100%', padding: '15px', background: '#FF4444', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '16px', marginTop: '10px' }}>LOGIN</button>
-            </div>
+      let View = () => (
+        <>
+          <HeroBanner />
+          <div style={{ position: 'relative', zIndex: 10, marginTop: '-50px' }}>
+            <MediaRow title="Trending Movies" items={trendingMovies} />
+            <MediaRow title="Popular Series" items={trendingSeries} />
+            <MediaRow title="Top Rated Masterpieces" items={topRated} />
           </div>
-        );
-      };
-
-      const AdminPanel = () => {
-        if (!isAdmin) return <h2 style={{textAlign: 'center', marginTop:'100px', color:'red'}}>Denied.</h2>;
-        
-        const [showForm, setShowForm] = useState(false);
-        const [form, setForm] = useState({ id: '', title: '', year: '', rating: '', image: '', type: 'movie', synopsis: '' });
-
-        const openForm = (item = null) => {
-          if(item) setForm(item);
-          else setForm({ id: '', title: '', year: '', rating: '', image: '', type: 'movie', synopsis: '' });
-          setShowForm(true);
-        };
-
-        const handleSave = () => {
-          if(!form.title || !form.image) return alert("Title and Image required");
-          const isNew = !form.id;
-          const saveItem = { ...form, id: isNew ? Date.now().toString() : form.id };
-          
-          if(form.type === 'movie') {
-            if(isNew) setMovies([...movies, saveItem]);
-            else setMovies(movies.map(m => m.id === saveItem.id ? saveItem : m));
-          } else {
-            if(isNew) setSeries([...series, saveItem]);
-            else setSeries(series.map(s => s.id === saveItem.id ? saveItem : s));
-          }
-          setShowForm(false);
-        };
-
-        const handleDelete = (id, type) => {
-          if(confirm("Are you sure you want to delete this?")) {
-            if(type === 'movie') setMovies(movies.filter(m => m.id !== id));
-            else setSeries(series.filter(s => s.id !== id));
-          }
-        };
-
-        return (
-          <div style={{ padding: '40px 5%', maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px', background: '#111', padding: '20px', borderRadius: '12px', border: '1px solid #333' }}>
-              <h2 style={{ margin: 0, color: '#FFD700' }}>Dashboard</h2>
-              <button onClick={() => openForm()} style={{ padding: '10px 20px', background: '#FFD700', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>+ Add New Content</button>
-            </div>
-
-            {showForm && (
-              <div style={{ background: '#1a1a1a', padding: '30px', borderRadius: '12px', marginBottom: '40px', border: '1px solid #FFD700' }}>
-                <h3 style={{ marginTop: 0 }}>{form.id ? 'Edit Content' : 'Add New Content'}</h3>
-                <div style={{display: 'flex', gap: '15px'}}>
-                  <input placeholder="Title" value={form.title} onChange={e=>setForm({...form, title: e.target.value})} />
-                  <input type="number" placeholder="Year" value={form.year} onChange={e=>setForm({...form, year: e.target.value})} />
-                </div>
-                <div style={{display: 'flex', gap: '15px'}}>
-                  <input type="number" step="0.1" placeholder="Rating (0-10)" value={form.rating} onChange={e=>setForm({...form, rating: e.target.value})} />
-                  <select value={form.type} onChange={e=>setForm({...form, type: e.target.value})}>
-                    <option value="movie">Movie</option>
-                    <option value="series">Series</option>
-                  </select>
-                </div>
-                <input placeholder="Image URL (e.g., https://...)" value={form.image} onChange={e=>setForm({...form, image: e.target.value})} />
-                <textarea placeholder="Synopsis" rows="3" value={form.synopsis} onChange={e=>setForm({...form, synopsis: e.target.value})}></textarea>
-                <div style={{display: 'flex', gap: '10px', justifyContent: 'flex-end'}}>
-                  <button onClick={() => setShowForm(false)} style={{ padding: '10px 20px', background: '#333', color: '#fff', border: 'none', borderRadius: '8px' }}>Cancel</button>
-                  <button onClick={handleSave} style={{ padding: '10px 20px', background: '#FFD700', color: '#000', border: 'none', borderRadius: '8px', fontWeight: 'bold' }}>Save Content</button>
-                </div>
-              </div>
-            )}
-
-            <h3 style={{ borderBottom: '1px solid #333', paddingBottom: '10px' }}>Manage Library</h3>
-            <div style={{ background: '#111', borderRadius: '12px', padding: '10px', border: '1px solid #222' }}>
-              {[...movies, ...series].map(item => (
-                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '15px', borderBottom: '1px solid #222', alignItems: 'center' }}>
-                  <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
-                    <img src={item.image} style={{width: '50px', height: '70px', objectFit: 'cover', borderRadius: '6px'}} />
-                    <div>
-                      <strong style={{fontSize: '18px'}}>{item.title}</strong>
-                      <div style={{color: '#888', fontSize: '13px'}}>{item.type.toUpperCase()} • Rating: {item.rating}</div>
-                    </div>
-                  </div>
-                  <div style={{display: 'flex', gap: '10px'}}>
-                    <button onClick={() => openForm(item)} style={{ padding: '8px 15px', background: '#333', color: '#fff', border: 'none', borderRadius: '6px' }}>Edit</button>
-                    <button onClick={() => handleDelete(item.id, item.type)} style={{ padding: '8px 15px', background: '#FF4444', color: '#fff', border: 'none', borderRadius: '6px' }}>Delete</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      };
-
-      const navBtn = { background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', fontSize: '15px', fontWeight: '600' };
-
-      let View = () => <><MediaGrid title="Trending Movies" items={movies} /><MediaGrid title="Popular Series" items={series} /></>;
-      if(route === '/movies') View = () => <MediaGrid title="All Movies" items={movies} />;
-      if(route === '/series') View = () => <MediaGrid title="All Series" items={series} />;
+        </>
+      );
+      
       if(route === '/detail') View = () => <ItemDetail item={selectedItem} />;
-      if(route === '/login') View = () => <div style={{textAlign:'center', marginTop:'100px'}}><h2>User Login Demo</h2><button onClick={()=>{setUser(true);nav('/');}} style={{padding:'10px 20px', background:'#FFD700', color:'#000', border:'none', borderRadius:'20px'}}>Simulate Login</button></div>;
-      if(route === '/admin-login') View = AdminLogin;
-      if(route === '/admin') View = AdminPanel;
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar />
           <div style={{ flex: 1 }}><View /></div>
-          <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#0a0a0a', borderTop: '1px solid #1a1a1a' }}>
+          <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#050505', borderTop: '1px solid #1a1a1a', marginTop: '40px' }}>
             <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0', color: '#fff', fontWeight: '900' }}>35<span style={{color: '#FFD700'}}>MM</span></h2>
-            <p style={{ color: '#666', fontSize: '14px', margin: '0' }}>Cinema. Rated.</p>
+            <p style={{ color: '#666', fontSize: '14px', margin: '0' }}>Powered by TMDB API • Custom Rated</p>
             <p style={{ color: '#444', fontSize: '12px', marginTop: '20px' }}>© 2026 TANVIR HOSSAIN. All Rights Reserved.</p>
           </footer>
         </div>

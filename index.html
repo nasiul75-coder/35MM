@@ -52,6 +52,10 @@
     .cast-card h4 { margin: 0; font-size: 14px; color: #fff; }
     .cast-card p { margin: 5px 0 0 0; font-size: 12px; color: #aaa; }
 
+    /* Custom Star Rating Hover */
+    .star { font-size: 35px; cursor: pointer; transition: 0.2s; color: #444; }
+    .star:hover { transform: scale(1.2); }
+
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .search-bar { width: 160px; }
@@ -71,10 +75,8 @@
     const BACKDROP_URL = "https://image.tmdb.org/t/p/original";
     const PROFILE_URL = "https://image.tmdb.org/t/p/w185";
 
-    // UPDATED RATING LOGIC WITH VOTE COUNT FILTER
     const getRatingData = (score, votes) => {
       if (votes < 50) return { cat: 'AWAITING REVIEWS', col: '#888888', bg: 'rgba(136, 136, 136, 0.15)' };
-      
       const num = parseFloat(score);
       if (num >= 9.5) return { cat: 'ABSOLUTE CINEMA', col: '#FFD700', bg: 'rgba(255, 215, 0, 0.15)' };
       if (num >= 9.0) return { cat: 'PERFECT', col: '#00BFFF', bg: 'rgba(0, 191, 255, 0.15)' };
@@ -84,9 +86,8 @@
       return { cat: 'ABSOLUTE TRASH', col: '#FF0000', bg: 'rgba(255, 0, 0, 0.15)' };
     };
 
-    // UPDATED AWARDS LOGIC WITH STRICT VOTE COUNT
     const getMockAward = (rating, votes) => {
-      if (votes < 300) return ""; // No fake awards for shows with low votes!
+      if (votes < 300) return ""; 
       const num = parseFloat(rating);
       if (num >= 9.0) return "🏆 Winner of Multiple Global Awards & Academy Favourites";
       if (num >= 8.0) return "🌟 Critically Acclaimed Masterpiece";
@@ -102,7 +103,7 @@
         title: item.title || item.name,
         year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4),
         rating: item.vote_average ? item.vote_average.toFixed(1) : '0.0',
-        votes: item.vote_count || 0, // Added votes tracking
+        votes: item.vote_count || 0, 
         image: item.poster_path ? IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster',
         backdrop: item.backdrop_path ? BACKDROP_URL + item.backdrop_path : '',
         synopsis: item.overview || 'No synopsis available.',
@@ -251,12 +252,19 @@
         const [cast, setCast] = useState([]);
         const [director, setDirector] = useState(null);
         const [details, setDetails] = useState(null);
+        const [providers, setProviders] = useState(null);
+        const [myRating, setMyRating] = useState(0);
         
         const r = getRatingData(item.rating, item.votes);
         const awardText = getMockAward(item.rating, item.votes);
         const apiType = item.type === 'series' ? 'tv' : 'movie';
 
         useEffect(() => {
+          // Load Personal Rating
+          const savedRate = localStorage.getItem(`35mm_rating_${item.id}`);
+          if (savedRate) setMyRating(parseInt(savedRate));
+
+          // Fetch Details, Videos, Cast
           fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=videos,credits`)
             .then(res => res.json())
             .then(data => {
@@ -266,7 +274,6 @@
                 setTrailer(official.key);
               }
               if (data.credits?.cast) setCast(data.credits.cast.slice(0, 10)); 
-              
               if (apiType === 'movie') {
                 const dir = data.credits?.crew?.find(c => c.job === 'Director');
                 if(dir) setDirector(dir);
@@ -276,6 +283,15 @@
               }
             });
 
+          // Fetch Watch Providers
+          fetch(`${BASE_URL}/${apiType}/${item.id}/watch/providers?api_key=${API_KEY}`)
+            .then(res => res.json())
+            .then(data => {
+              // IN stands for India region. Fallback to US if India is not available.
+              if (data.results && data.results.IN) setProviders(data.results.IN);
+              else if (data.results && data.results.US) setProviders(data.results.US);
+            });
+
           if (apiType === 'tv') {
             fetch(`${BASE_URL}/tv/${item.id}/season/1?api_key=${API_KEY}`)
               .then(res => res.json())
@@ -283,11 +299,60 @@
           }
         }, [item]);
 
+        const handleRate = (score) => {
+          setMyRating(score);
+          localStorage.setItem(`35mm_rating_${item.id}`, score);
+        };
+
+        const WatchProvidersUI = () => {
+          if (!providers) return null;
+          // Flatten providers (combine flatrate/streaming, rent, buy)
+          const allProviders = [];
+          if(providers.flatrate) allProviders.push(...providers.flatrate);
+          if(providers.rent) allProviders.push(...providers.rent);
+          if(providers.buy) allProviders.push(...providers.buy);
+          
+          // Remove duplicates
+          const uniqueProviders = Array.from(new Set(allProviders.map(a => a.provider_id)))
+            .map(id => allProviders.find(a => a.provider_id === id));
+
+          if (uniqueProviders.length === 0) return null;
+
+          return (
+            <div style={{ marginBottom: '30px' }}>
+              <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Available to Watch On</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
+                {uniqueProviders.map(p => (
+                  <div key={p.provider_id} title={p.provider_name} style={{ display: 'flex', alignItems: 'center', background: '#1a1a1a', padding: '8px 15px', borderRadius: '12px', border: '1px solid #333' }}>
+                    <img src={IMG_URL + p.logo_path} style={{ width: '35px', height: '35px', borderRadius: '8px', marginRight: '10px' }} />
+                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{p.provider_name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        };
+
         return (
           <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
             <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-              <img src={item.image} style={{ width: '100%', maxWidth: '350px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
+              
+              <div style={{ width: '100%', maxWidth: '350px' }}>
+                <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', marginBottom: '20px' }} />
+                
+                {/* Personal User Rating UI */}
+                <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center' }}>
+                  <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#aaa' }}>Rate this {item.type}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
+                    {[1,2,3,4,5,6,7,8,9,10].map(star => (
+                      <span key={star} onClick={() => handleRate(star)} className="star" style={{ color: star <= myRating ? '#FFD700' : '#333' }}>★</span>
+                    ))}
+                  </div>
+                  {myRating > 0 && <p style={{ margin: '10px 0 0 0', color: '#FFD700', fontWeight: 'bold', fontSize: '14px' }}>You rated this {myRating} / 10</p>}
+                </div>
+              </div>
+
               <div style={{ flex: 1, minWidth: '300px' }}>
                 <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
                 <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()} {details && details.runtime ? `• ${details.runtime} mins` : ''}</p>
@@ -309,6 +374,9 @@
                 
                 <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
                 <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc', marginBottom: '30px' }}>{item.synopsis}</p>
+
+                {/* Where to Watch */}
+                <WatchProvidersUI />
 
                 {director && (
                   <div style={{ marginBottom: '30px' }}>
@@ -411,12 +479,10 @@
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          
           <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }} onClick={() => nav('/')}>
               35<span style={{color: '#FFD700'}}>MM</span>
             </div>
-            
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
               <input 
                 type="text" 

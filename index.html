@@ -39,9 +39,6 @@
     .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.8) 30%, transparent 100%); }
     .hero-content { position: relative; z-index: 2; padding: 50px 5%; max-width: 800px; }
 
-    .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; }
-    .episode-card img { width: 120px; height: 70px; object-fit: cover; border-radius: 8px; }
-
     .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; }
     .trailer-btn { background: #fff; }
     .trailer-btn:hover { background: #FFD700; transform: scale(1.05); }
@@ -69,6 +66,8 @@
       .search-bar { width: 140px; }
       .search-bar:focus { width: 200px; }
       .action-btn { padding: 12px 15px; font-size: 14px; width: 100%; }
+      .episode-card { flex-direction: column; text-align: center; }
+      .episode-card img { width: 100% !important; height: auto !important; }
     }
   </style>
 </head>
@@ -401,6 +400,33 @@
               </div>
             </div>
 
+            {/* DEDICATED EPISODES SECTION - NEW FIX */}
+            {episodes.length > 0 && (
+              <div style={{ marginTop: '50px', padding: '30px', background: '#0a0a0a', borderRadius: '16px', border: '1px solid #222' }}>
+                <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: '0 0 25px 0'}}>Season 1 Episodes</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {episodes.map(ep => {
+                    const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
+                    const epVotes = ep.vote_count || 0;
+                    const epRData = getRatingData(epRating, epVotes);
+                    return (
+                      <div key={ep.id} className="episode-card" style={{ background: '#111', padding: '15px', borderRadius: '12px', border: '1px solid #222', display: 'flex', gap: '20px', alignItems: 'center' }}>
+                        <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} style={{ width: '160px', height: '90px', objectFit: 'cover', borderRadius: '8px' }} />
+                        <div style={{ flex: 1 }}>
+                          <strong style={{ fontSize: '18px', color: '#fff' }}>{ep.episode_number}. {ep.name}</strong>
+                          <p style={{ fontSize: '14px', color: '#aaa', margin: '8px 0' }}>{(ep.overview || "No description available.").substring(0, 150)}...</p>
+                        </div>
+                        <div style={{ padding: '10px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '140px' }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '22px' }}>{epRating}</div>
+                          <div style={{ fontSize: '11px', letterSpacing: '1px', marginTop: '4px' }}>{epRData.cat}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {similar.length > 0 && (
               <div style={{ marginTop: '50px', paddingTop: '20px', borderTop: '1px solid #222' }}>
                 <MediaRow title="You Might Also Like..." items={similar} />
@@ -471,7 +497,6 @@
         </div>
       );
 
-      // --- NAYA ABOUT PAGE COMPONENT ---
       const AboutPage = () => (
         <div style={{ padding: '100px 5% 40px', maxWidth: '900px', margin: '0 auto', minHeight: '80vh' }}>
           <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '40px', fontSize: '16px' }}>← Back to Home</button>
@@ -530,13 +555,12 @@
       if(route === '/detail') View = () => <ItemDetail item={selectedItem} />;
       if(route === '/genre') View = () => <GridView title={`${activeGenreName} Movies`} items={genreResults} emptyMsg="Loading..." />;
       if(route === '/watchlist') View = () => <GridView title="My Watchlist" items={watchlist} emptyMsg="Your watchlist is empty. Add some movies!" />;
-      if(route === '/about') View = () => <AboutPage />; // Routing for new About Page
+      if(route === '/about') View = () => <AboutPage />; 
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           
           <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {/* LOGO CLICK AAB ABOUT PAGE PE JAYEGA */}
             <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }} onClick={() => nav('/about')}>
               35<span style={{color: '#FFD700'}}>MM</span>
             </div>

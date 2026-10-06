@@ -153,6 +153,11 @@
       const [trendingMovies, setTrendingMovies] = useState([]);
       const [trendingSeries, setTrendingSeries] = useState([]);
       const [topRated, setTopRated] = useState([]);
+      
+      // NEW STATES FOR LONGER HOMEPAGE
+      const [nowPlaying, setNowPlaying] = useState([]);
+      const [upcoming, setUpcoming] = useState([]);
+      const [topSeries, setTopSeries] = useState([]);
 
       const [watchlist, setWatchlist] = useState([]);
       const [genreResults, setGenreResults] = useState([]);
@@ -164,10 +169,7 @@
 
         fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`)
           .then(r => r.json())
-          .then(data => {
-            const formatted = data.results.map(m => formatData(m, 'movie'));
-            setTrendingMovies(formatted);
-          });
+          .then(data => setTrendingMovies(data.results.map(m => formatData(m, 'movie'))));
 
         fetch(`${BASE_URL}/trending/tv/day?api_key=${API_KEY}`)
           .then(r => r.json())
@@ -176,6 +178,20 @@
         fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}`)
           .then(r => r.json())
           .then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
+          
+        // FETCHING NEW LISTS TO MAKE HOMEPAGE LONGER
+        fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`)
+          .then(r => r.json())
+          .then(data => setNowPlaying(data.results.map(m => formatData(m, 'movie'))));
+
+        fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`)
+          .then(r => r.json())
+          .then(data => setUpcoming(data.results.map(m => formatData(m, 'movie'))));
+
+        fetch(`${BASE_URL}/tv/top_rated?api_key=${API_KEY}`)
+          .then(r => r.json())
+          .then(data => setTopSeries(data.results.map(s => formatData(s, 'series'))));
+
       }, []);
 
       const nav = (path, item = null) => { 
@@ -610,10 +626,14 @@
                 <button key={g.id} className="genre-btn" onClick={() => handleGenreClick(g)}>{g.name}</button>
               ))}
             </div>
+            {/* ADDED 3 NEW CATEGORIES TO MAKE THE HOMEPAGE LONGER */}
             <div style={{ position: 'relative', zIndex: 10, marginTop: '10px' }}>
+              <MediaRow title="Now Playing in Theaters" items={nowPlaying} />
               <MediaRow title="Trending Movies" items={trendingMovies} />
               <MediaRow title="Popular Series" items={trendingSeries} />
               <MediaRow title="Top Rated Masterpieces" items={topRated} />
+              <MediaRow title="Upcoming Releases" items={upcoming} />
+              <MediaRow title="Top Rated Series" items={topSeries} />
             </div>
           </>
         );

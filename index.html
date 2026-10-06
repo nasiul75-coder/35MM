@@ -37,9 +37,16 @@
     .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; }
     .episode-card img { width: 120px; height: 70px; object-fit: cover; border-radius: 8px; }
 
-    /* Trailer Button Style */
     .trailer-btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #fff; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 16px; transition: 0.2s; border: none; cursor: pointer; }
     .trailer-btn:hover { background: #FFD700; transform: scale(1.05); }
+
+    /* Cast & Crew Styles */
+    .cast-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; }
+    .cast-card { flex: 0 0 120px; text-align: center; cursor: pointer; transition: 0.3s; }
+    .cast-card:hover { transform: translateY(-5px); }
+    .cast-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #333; margin-bottom: 10px; }
+    .cast-card h4 { margin: 0; font-size: 14px; color: #fff; }
+    .cast-card p { margin: 5px 0 0 0; font-size: 12px; color: #aaa; }
 
     @media (max-width: 768px) {
       .nav-links { display: none; }
@@ -58,6 +65,7 @@
     const BASE_URL = "https://api.themoviedb.org/3";
     const IMG_URL = "https://image.tmdb.org/t/p/w500";
     const BACKDROP_URL = "https://image.tmdb.org/t/p/original";
+    const PROFILE_URL = "https://image.tmdb.org/t/p/w185";
 
     const getRatingData = (score) => {
       const num = parseFloat(score);
@@ -69,9 +77,17 @@
       return { cat: 'ABSOLUTE TRASH', col: '#FF0000', bg: 'rgba(255, 0, 0, 0.15)' };
     };
 
+    const getMockAward = (rating) => {
+      const num = parseFloat(rating);
+      if (num >= 9.0) return "🏆 Winner of Multiple Global Awards & Academy Favourites";
+      if (num >= 8.0) return "🌟 Critically Acclaimed Masterpiece";
+      if (num >= 7.0) return "🎖️ Official Selection & Fan Favourite";
+      return "";
+    };
+
     const formatData = (item, type) => {
       let finalType = item.media_type || type;
-      if (finalType === 'tv') finalType = 'series'; // Convert tv to series for display
+      if (finalType === 'tv') finalType = 'series'; 
       return {
         id: item.id,
         title: item.title || item.name,
@@ -135,6 +151,7 @@
         }
       };
 
+      // Component: HERO BANNER
       const HeroBanner = () => {
         if (!heroItem) return <div className="hero-banner"></div>;
         const r = getRatingData(heroItem.rating);
@@ -155,6 +172,7 @@
         );
       };
 
+      // Component: HORIZONTAL SCROLL ROW
       const MediaRow = ({ title, items }) => (
         <div style={{ marginTop: '20px' }}>
           <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>{title}</h2>
@@ -178,6 +196,184 @@
         </div>
       );
 
+      // Component: PERSON / ACTOR / DIRECTOR DETAILS
+      const PersonDetail = ({ personId }) => {
+        const [person, setPerson] = useState(null);
+        const [credits, setCredits] = useState([]);
+
+        useEffect(() => {
+          fetch(`${BASE_URL}/person/${personId}?api_key=${API_KEY}&append_to_response=combined_credits`)
+            .then(res => res.json())
+            .then(data => {
+              setPerson(data);
+              // Extract top movies they worked in
+              let movies = data.combined_credits?.cast || [];
+              if (movies.length === 0) movies = data.combined_credits?.crew || [];
+              
+              const formatted = movies
+                .filter(m => m.poster_path)
+                .sort((a,b) => b.vote_average - a.vote_average)
+                .slice(0, 15)
+                .map(m => formatData(m, m.media_type));
+                
+              setCredits(formatted);
+            });
+        }, [personId]);
+
+        if (!person) return <div style={{padding: '100px 5%', color: '#fff'}}>Loading Profile...</div>;
+
+        return (
+          <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+            <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
+              <img src={person.profile_path ? PROFILE_URL + person.profile_path : 'https://via.placeholder.com/300x450?text=No+Photo'} style={{ width: '100%', maxWidth: '300px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
+              <div style={{ flex: 1, minWidth: '300px' }}>
+                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{person.name}</h1>
+                <p style={{ color: '#FFD700', fontSize: '18px', fontWeight: 'bold' }}>{person.known_for_department}</p>
+                <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', marginTop: '30px'}}>Biography</h3>
+                <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#ccc' }}>{person.biography || "Biography not available."}</p>
+              </div>
+            </div>
+            
+            {credits.length > 0 && (
+              <div style={{ marginTop: '50px' }}>
+                <MediaRow title="Known For (Movies & Series)" items={credits} />
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // Component: MOVIE / SERIES DETAILS
+      const ItemDetail = ({ item }) => {
+        const [episodes, setEpisodes] = useState([]);
+        const [trailer, setTrailer] = useState(null);
+        const [cast, setCast] = useState([]);
+        const [director, setDirector] = useState(null);
+        const [details, setDetails] = useState(null);
+        const r = getRatingData(item.rating);
+        const awardText = getMockAward(item.rating);
+
+        const apiType = item.type === 'series' ? 'tv' : 'movie';
+
+        useEffect(() => {
+          fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=videos,credits`)
+            .then(res => res.json())
+            .then(data => {
+              setDetails(data);
+              // Video
+              if (data.videos?.results?.length > 0) {
+                const official = data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results[0];
+                setTrailer(official.key);
+              }
+              // Cast
+              if (data.credits?.cast) {
+                setCast(data.credits.cast.slice(0, 10)); // Top 10 actors
+              }
+              // Director
+              if (apiType === 'movie') {
+                const dir = data.credits?.crew?.find(c => c.job === 'Director');
+                if(dir) setDirector(dir);
+              } else {
+                const creator = data.created_by?.[0]; // TV uses "created_by"
+                if(creator) setDirector(creator);
+              }
+            });
+
+          if (apiType === 'tv') {
+            fetch(`${BASE_URL}/tv/${item.id}/season/1?api_key=${API_KEY}`)
+              .then(res => res.json())
+              .then(data => { if(data.episodes) setEpisodes(data.episodes); });
+          }
+        }, [item]);
+
+        return (
+          <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+            <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
+              <img src={item.image} style={{ width: '100%', maxWidth: '350px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
+              <div style={{ flex: 1, minWidth: '300px' }}>
+                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
+                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()} {details && details.runtime ? `• ${details.runtime} mins` : ''}</p>
+                
+                {awardText && <p style={{ color: '#FFD700', fontSize: '16px', fontWeight: 'bold', marginBottom: '20px' }}>{awardText}</p>}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'inline-block', padding: '15px 30px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
+                    <div style={{ fontSize: '38px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
+                    <div style={{ fontSize: '12px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '10px', textAlign: 'center' }}>{r.cat}</div>
+                  </div>
+                  
+                  {trailer && (
+                    <a href={`https://www.youtube.com/watch?v=${trailer}`} target="_blank" rel="noreferrer" className="trailer-btn">
+                      ▶ Watch Trailer
+                    </a>
+                  )}
+                </div>
+                
+                <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
+                <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc', marginBottom: '30px' }}>{item.synopsis}</p>
+
+                {/* Director Section */}
+                {director && (
+                  <div style={{ marginBottom: '30px' }}>
+                    <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>{item.type === 'movie' ? 'Directed By' : 'Created By'}</h3>
+                    <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer', transition: '0.3s' }} className="cast-card">
+                      <img src={director.profile_path ? PROFILE_URL + director.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div style={{textAlign: 'left'}}>
+                        <h4 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>{director.name}</h4>
+                        <p style={{ margin: 0, color: '#aaa', fontSize: '14px' }}>{item.type === 'movie' ? 'Director' : 'Creator'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cast Section */}
+            {cast.length > 0 && (
+              <div style={{ marginTop: '40px' }}>
+                <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Top Cast</h3>
+                <div className="cast-row">
+                  {cast.map(actor => (
+                    <div key={actor.id} className="cast-card" onClick={() => nav('/person', actor.id)}>
+                      <img src={actor.profile_path ? PROFILE_URL + actor.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} alt={actor.name} />
+                      <h4>{actor.name}</h4>
+                      <p>{actor.character}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Episodes */}
+            {episodes.length > 0 && (
+              <div style={{ marginTop: '40px' }}>
+                <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Season 1 Episodes</h3>
+                {episodes.map(ep => {
+                  const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
+                  const epRData = getRatingData(epRating);
+                  return (
+                    <div key={ep.id} className="episode-card">
+                      <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} />
+                      <div style={{ flex: 1 }}>
+                        <strong style={{ fontSize: '18px' }}>{ep.episode_number}. {ep.name}</strong>
+                        <p style={{ fontSize: '14px', color: '#aaa', margin: '5px 0' }}>{(ep.overview || "No description available.").substring(0, 100)}...</p>
+                      </div>
+                      <div style={{ padding: '8px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '130px' }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '20px' }}>{epRating}</div>
+                        <div style={{ fontSize: '10px', letterSpacing: '1px' }}>{epRData.cat}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // Search and Main Views Setup
       const SearchResults = () => (
         <div style={{ paddingTop: '100px', minHeight: '80vh' }}>
           <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>
@@ -203,91 +399,6 @@
         </div>
       );
 
-      const ItemDetail = ({ item }) => {
-        const [episodes, setEpisodes] = useState([]);
-        const [trailer, setTrailer] = useState(null);
-        const r = getRatingData(item.rating);
-
-        // Map 'series' back to 'tv' for API calls
-        const apiType = item.type === 'series' ? 'tv' : 'movie';
-
-        useEffect(() => {
-          // Fetch Trailer
-          fetch(`${BASE_URL}/${apiType}/${item.id}/videos?api_key=${API_KEY}`)
-            .then(res => res.json())
-            .then(data => {
-              if (data.results && data.results.length > 0) {
-                // Find Official Trailer
-                const official = data.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
-                if (official) setTrailer(official.key);
-                else setTrailer(data.results[0].key); // Fallback to any video if trailer not found
-              }
-            });
-
-          // Fetch Episodes if Series
-          if (apiType === 'tv') {
-            fetch(`${BASE_URL}/tv/${item.id}/season/1?api_key=${API_KEY}`)
-              .then(res => res.json())
-              .then(data => {
-                if(data.episodes) setEpisodes(data.episodes);
-              });
-          }
-        }, [item]);
-
-        return (
-          <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
-            <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-              <img src={item.image} style={{ width: '100%', maxWidth: '350px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
-              <div style={{ flex: 1, minWidth: '300px' }}>
-                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
-                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '20px' }}>{item.year} • {item.type.toUpperCase()}</p>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'inline-block', padding: '15px 30px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
-                    <div style={{ fontSize: '38px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
-                    <div style={{ fontSize: '12px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '10px', textAlign: 'center' }}>{r.cat}</div>
-                  </div>
-                  
-                  {/* Trailer Button */}
-                  {trailer && (
-                    <a href={`https://www.youtube.com/watch?v=${trailer}`} target="_blank" rel="noreferrer" className="trailer-btn">
-                      ▶ Watch Trailer
-                    </a>
-                  )}
-                </div>
-                
-                <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
-                <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc' }}>{item.synopsis}</p>
-
-                {episodes.length > 0 && (
-                  <div style={{ marginTop: '40px' }}>
-                    <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Season 1 Episodes</h3>
-                    {episodes.map(ep => {
-                      const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
-                      const epRData = getRatingData(epRating);
-                      return (
-                        <div key={ep.id} className="episode-card">
-                          <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} />
-                          <div style={{ flex: 1 }}>
-                            <strong style={{ fontSize: '18px' }}>{ep.episode_number}. {ep.name}</strong>
-                            <p style={{ fontSize: '14px', color: '#aaa', margin: '5px 0' }}>{(ep.overview || "No description available.").substring(0, 100)}...</p>
-                          </div>
-                          <div style={{ padding: '8px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '130px' }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '20px' }}>{epRating}</div>
-                            <div style={{ fontSize: '10px', letterSpacing: '1px' }}>{epRData.cat}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      };
-
       let View = () => {
         if (searchQuery.length > 2) return <SearchResults />;
         return (
@@ -303,8 +414,8 @@
       };
       
       if(route === '/detail') View = () => <ItemDetail item={selectedItem} />;
+      if(route === '/person') View = () => <PersonDetail personId={selectedItem} />;
 
-      // Nav code embedded directly to fix the keyboard losing focus bug
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           

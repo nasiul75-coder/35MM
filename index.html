@@ -38,72 +38,74 @@
     @keyframes fadeOutSplash { to { opacity: 0; visibility: hidden; } }
     @keyframes scrollLines { 0% { background-position: 0 0; } 100% { background-position: 0 10px; } }
 
+    /* UI POLISH */
     .nav-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; font-weight: 600; transition: 0.2s; }
-    .nav-btn:hover { color: #fff; }
-    .search-bar { padding: 10px 15px; border-radius: 20px; border: 1px solid #333; background: rgba(0,0,0,0.5); color: white; width: 200px; outline: none; transition: 0.3s; }
-    .search-bar:focus { border-color: var(--primary); width: 260px; background: rgba(0,0,0,0.8); }
+    .nav-btn:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
+    .search-bar { padding: 10px 15px; border-radius: 20px; border: 1px solid #333; background: rgba(0,0,0,0.5); color: white; width: 200px; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif; }
+    .search-bar:focus { border-color: var(--primary); width: 260px; background: rgba(0,0,0,0.8); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
 
     .media-row { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5%; scroll-snap-type: x mandatory; padding-bottom: 20px; }
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px 5%; }
-    .media-card { flex: 0 0 200px; scroll-snap-align: start; background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #222; position: relative; transition: transform 0.3s; }
-    .media-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
+    .media-card { flex: 0 0 200px; scroll-snap-align: start; background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #222; position: relative; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+    .media-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
     .media-card img { width: 100%; height: 300px; object-fit: cover; }
 
-    /* FIXED SMOOTH CAROUSEL */
+    /* FIXED CAROUSEL */
     .carousel-container { position: relative; width: 100%; height: 80vh; overflow: hidden; background: #000; }
-    .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
+    .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
     .carousel-slide.active { opacity: 1; z-index: 1; }
-    .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.7) 40%, transparent 100%); z-index: 2; pointer-events: none; }
+    .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.4) 50%, transparent 100%); z-index: 2; pointer-events: none; }
     .hero-content { position: relative; z-index: 3; padding: 50px 5%; max-width: 800px; }
     
-    .fallback-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
-    .video-background { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; z-index: 1; pointer-events: none; border: none; animation: slowFadeIn 2s ease 1s forwards; opacity: 0; }
-    
-    @keyframes slowFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+    .fallback-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; transition: opacity 2s ease-in-out; }
+    .video-background { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; z-index: 1; pointer-events: none; border: none; opacity: 0; animation: slowVideoFade 2s ease-in-out 1.5s forwards; }
+    @keyframes slowVideoFade { to { opacity: 1; } }
 
-    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-    .carousel-btn:hover { background: var(--primary); color: black; }
-    .carousel-btn.left { left: 20px; }
-    .carousel-btn.right { right: 20px; }
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 24px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
+    .carousel-btn:hover { background: var(--primary); color: black; transform: translateY(-50%) scale(1.1); }
+    .carousel-btn.left { left: 30px; }
+    .carousel-btn.right { right: 30px; }
     .carousel-indicators { position: absolute; bottom: 30px; right: 5%; display: flex; gap: 8px; z-index: 10; }
     .indicator { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
-    .indicator.active { background: var(--primary); transform: scale(1.3); }
+    .indicator.active { background: var(--primary); transform: scale(1.4); box-shadow: 0 0 8px var(--primary); }
 
-    .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; transition: 0.2s; }
-    .episode-card:hover { border-color: #444; background: #151515; }
-    .episode-card img { width: 160px; height: 90px; object-fit: cover; border-radius: 8px; }
+    .episode-card { display: flex; gap: 15px; background: #0f0f0f; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #1f1f1f; align-items: center; transition: 0.3s; }
+    .episode-card:hover { border-color: #444; background: #1a1a1a; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .episode-card img { width: 160px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; }
-    .trailer-btn { background: #fff; }
-    .trailer-btn:hover { background: #FFD700; transform: scale(1.05); }
-    .watchlist-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; }
-    .watchlist-btn:hover { background: #333; transform: scale(1.05); }
-    .share-btn { background: #25D366; color: #fff; }
-    .share-btn:hover { transform: scale(1.05); }
+    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+    .trailer-btn { background: #fff; box-shadow: 0 4px 15px rgba(255,255,255,0.2); }
+    .trailer-btn:hover { background: #FFD700; transform: scale(1.05); box-shadow: 0 4px 20px rgba(255,215,0,0.4); }
+    .watchlist-btn { background: #222; color: #fff; border: 1px solid #444; }
+    .watchlist-btn:hover { background: #333; transform: scale(1.05); border-color: #666; }
+    
+    .rating-badge { display: inline-block; padding: 6px 15px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+
+    /* Netflix Style Age Rating Badge */
+    .age-rating { border: 1px solid #666; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #ddd; font-weight: bold; background: rgba(0,0,0,0.5); text-transform: uppercase; }
 
     .cast-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; }
     .cast-card { flex: 0 0 120px; text-align: center; cursor: pointer; transition: 0.3s; }
     .cast-card:hover { transform: translateY(-5px); }
-    .cast-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #333; margin-bottom: 10px; }
-    .cast-card h4 { margin: 0; font-size: 14px; color: #fff; }
+    .cast-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #333; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .cast-card h4 { margin: 0; font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .cast-card p { margin: 5px 0 0 0; font-size: 12px; color: #aaa; }
 
-    .star { font-size: 35px; cursor: pointer; transition: 0.2s; color: #444; }
+    .star { font-size: 35px; cursor: pointer; transition: 0.2s; color: #444; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
     .star:hover { transform: scale(1.2); }
 
     .genre-row { display: flex; gap: 15px; overflow-x: auto; padding: 20px 5%; margin-top: -30px; position: relative; z-index: 10; }
     .genre-btn { padding: 10px 25px; background: rgba(20,20,20,0.8); border: 1px solid #333; color: white; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-weight: bold; backdrop-filter: blur(5px); }
-    .genre-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); }
+    .genre-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255,215,0,0.3); }
 
-    .season-btn { padding: 10px 20px; background: #222; color: #fff; border: 1px solid #333; border-radius: 20px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: 0.2s; }
-    .season-btn:hover { background: #333; }
-    .season-btn.active { background: #FFD700; color: #000; border-color: #FFD700; }
+    .season-select { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; outline: none; transition: 0.3s; }
+    .season-select:focus, .season-select:hover { border-color: #FFD700; background: #222; }
 
-    .review-textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; outline: none; transition: 0.3s; }
-    .review-textarea:focus { border-color: #FFD700; }
-    .save-review-btn { background: #FFD700; color: #000; font-weight: bold; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; }
-    .save-review-btn:hover { transform: scale(1.02); }
-    .saved-review-box { background: #1a1a1a; border-left: 4px solid #FFD700; padding: 15px; margin-top: 15px; border-radius: 4px 8px 8px 4px; color: #ccc; font-style: italic; line-height: 1.5; text-align: left; }
+    .review-textarea { width: 100%; background: #111; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+    .review-textarea:focus { border-color: #FFD700; background: #1a1a1a; }
+    .save-review-btn { background: #FFD700; color: #000; font-weight: bold; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255,215,0,0.2); }
+    .save-review-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,215,0,0.4); }
+    .saved-review-box { background: #111; border-left: 4px solid #FFD700; padding: 15px; margin-top: 15px; border-radius: 4px 8px 8px 4px; color: #ccc; font-style: italic; line-height: 1.6; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
     @media (max-width: 768px) {
       .nav-links { display: none; }
@@ -121,7 +123,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     const API_KEY = "7b9a12af809f78ea58b825ed3090934a";
     const BASE_URL = "https://api.themoviedb.org/3";
@@ -149,9 +151,9 @@
     const getMockAward = (rating, votes) => {
       if (votes < 300) return ""; 
       const num = parseFloat(rating);
-      if (num >= 9.0) return "🏆 Winner of Multiple Global Awards & Academy Favourites";
-      if (num >= 8.0) return "🌟 Critically Acclaimed Masterpiece";
-      if (num >= 7.0) return "🎖️ Official Selection & Fan Favourite";
+      if (num >= 9.0) return "🏆 Multiple Global Awards";
+      if (num >= 8.0) return "🌟 Critically Acclaimed";
+      if (num >= 7.0) return "🎖️ Fan Favourite";
       return "";
     };
 
@@ -207,7 +209,6 @@
         fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`).then(r => r.json()).then(data => {
           const formatted = data.results.map(m => formatData(m, 'movie'));
           setTrendingMovies(formatted);
-          // SIMPLE RANDOMIZATION (Fixes API Glitches)
           const valid = formatted.filter(i => i.backdrop);
           const shuffled = valid.sort(() => 0.5 - Math.random()).slice(0, 10);
           setHeroRandomMovies(shuffled);
@@ -276,26 +277,29 @@
         );
       };
 
-      // FIXED SMOOTH CAROUSEL 
+      // PERFECTED SMOOTH GLITCH-FREE SLIDER
       const HeroCarousel = ({ items }) => {
         const [currentIndex, setCurrentIndex] = useState(0);
         const [videoKey, setVideoKey] = useState(null);
+        const [isMuted, setIsMuted] = useState(true);
         const topItems = items ? items.slice(0, 10) : [];
 
         useEffect(() => {
           if (topItems.length === 0) return;
           const timer = setInterval(() => {
-            setCurrentIndex((prev) => (prev + 1) % topItems.length);
+            setCurrentIndex((prev) => { setIsMuted(true); return (prev + 1) % topItems.length; });
           }, 15000); 
           return () => clearInterval(timer);
         }, [topItems.length]);
 
         useEffect(() => {
           let isMounted = true;
-          setVideoKey(null);
+          setVideoKey(null); // Reset video on slide change
           if(topItems[currentIndex]){
             const item = topItems[currentIndex];
             const apiType = item.type === 'series' ? 'tv' : 'movie';
+            
+            // Wait 1.5s before loading iframe to ensure smooth image transition first
             const delay = setTimeout(() => {
               fetch(`${BASE_URL}/${apiType}/${item.id}/videos?api_key=${API_KEY}`)
                 .then(res => res.json()).then(data => {
@@ -305,15 +309,15 @@
                     setVideoKey(official.key);
                   }
                 });
-            }, 1000); // 1 second delay to fetch trailer safely
+            }, 1500); 
             return () => { isMounted = false; clearTimeout(delay); };
           }
         }, [currentIndex, items]);
 
         if (topItems.length === 0) return <div className="carousel-container"></div>;
 
-        const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % topItems.length);
-        const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + topItems.length) % topItems.length);
+        const nextSlide = () => { setCurrentIndex((prev) => (prev + 1) % topItems.length); setIsMuted(true); };
+        const prevSlide = () => { setCurrentIndex((prev) => (prev - 1 + topItems.length) % topItems.length); setIsMuted(true); };
 
         return (
           <div className="carousel-container">
@@ -323,14 +327,13 @@
               return (
                 <div key={item.id} className={`carousel-slide ${isCurrent ? 'active' : ''}`}>
                   
-                  {/* Image ALWAYS stays at opacity 1, preventing black flashes */}
+                  {/* Backdrop stays solid. Video fades over it cleanly */}
                   <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})` }}></div>
                   
-                  {/* Video fades in SLOWLY on top of the image */}
                   {isCurrent && videoKey && (
                     <iframe 
                       className="video-background" 
-                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`} 
+                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`} 
                       allow="autoplay; encrypted-media">
                     </iframe>
                   )}
@@ -339,8 +342,8 @@
                   
                   {isCurrent && (
                     <div className="hero-content">
-                      <div style={{ display: 'inline-block', padding: '5px 12px', border: `1px solid ${r.col}`, background: r.bg, borderRadius: '4px', color: r.col, fontWeight: 'bold', fontSize: '14px', marginBottom: '15px', backdropFilter: 'blur(5px)' }}>
-                        {item.rating} • {r.cat}
+                      <div className="rating-badge" style={{ border: `1px solid ${r.col}`, background: r.bg, marginBottom: '15px' }}>
+                        <span style={{ color: r.col, fontWeight: 'bold', fontSize: '14px' }}>{item.rating} • {r.cat}</span>
                       </div>
                       <h1 style={{ fontSize: '48px', margin: '0 0 15px 0', fontWeight: '900', textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}>{item.title}</h1>
                       <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#ddd', textShadow: '1px 1px 5px rgba(0,0,0,0.8)', maxWidth: '600px' }}>{item.synopsis.substring(0, 150)}...</p>
@@ -349,6 +352,12 @@
                       </div>
                     </div>
                   )}
+
+                  {isCurrent && videoKey && (
+                    <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} style={{ position: 'absolute', bottom: '100px', right: '5%', zIndex: 20, background: 'rgba(0,0,0,0.5)', border: '1px solid #666', color: '#fff', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.3s', backdropFilter: 'blur(5px)' }} title={isMuted ? "Unmute" : "Mute"}>
+                      {isMuted ? '🔇' : '🔊'}
+                    </button>
+                  )}
                 </div>
               );
             })}
@@ -356,7 +365,7 @@
             <button className="carousel-btn right" onClick={nextSlide}>❯</button>
             <div className="carousel-indicators">
               {topItems.map((_, idx) => (
-                <div key={idx} className={`indicator ${idx === currentIndex ? 'active' : ''}`} onClick={() => setCurrentIndex(idx)}></div>
+                <div key={idx} className={`indicator ${idx === currentIndex ? 'active' : ''}`} onClick={() => {setCurrentIndex(idx); setIsMuted(true);}}></div>
               ))}
             </div>
           </div>
@@ -387,7 +396,7 @@
         </div>
       );
 
-      // OLD BELOVED UI RESTORED (WITH TOP VIDEO PLAYER)
+      // OLD BELOVED UI RESTORED (WITH TOP VIDEO PLAYER & MATURITY RATINGS)
       const ItemDetail = ({ item }) => {
         const [episodes, setEpisodes] = useState([]);
         const [trailer, setTrailer] = useState(null);
@@ -398,6 +407,7 @@
         const [myRating, setMyRating] = useState(0);
         const [details, setDetails] = useState(null);
         const [activeSeason, setActiveSeason] = useState(1);
+        const [ageRating, setAgeRating] = useState("U/A"); // NEW STATE FOR CENSOR RATING
         
         const [myReviewText, setMyReviewText] = useState("");
         const [savedReview, setSavedReview] = useState(null);
@@ -418,16 +428,39 @@
           if (storedReview) setSavedReview(storedReview);
           else setSavedReview(null);
 
-          fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=videos,credits`).then(res => res.json()).then(data => {
+          // FETCH ALL DETAILS INCLUDING RELEASE_DATES/CONTENT_RATINGS FOR AGE CERTIFICATION
+          const appendData = apiType === 'movie' ? 'videos,credits,release_dates' : 'videos,credits,content_ratings';
+          
+          fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=${appendData}`).then(res => res.json()).then(data => {
               setDetails(data);
+              
+              // FIND YOUTUBE TRAILER
               if (data.videos?.results?.length > 0) setTrailer((data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results[0]).key);
+              
+              // FIND CAST & DIRECTOR
               if (data.credits?.cast) setCast(data.credits.cast.slice(0, 10)); 
               if (apiType === 'movie') {
                 const dir = data.credits?.crew?.find(c => c.job === 'Director');
                 if(dir) setDirector(dir);
+                
+                // MOVIE AGE RATING LOGIC
+                if (data.release_dates?.results) {
+                  const inRel = data.release_dates.results.find(r => r.iso_3166_1 === 'IN');
+                  const usRel = data.release_dates.results.find(r => r.iso_3166_1 === 'US');
+                  if (inRel && inRel.release_dates[0]?.certification) setAgeRating(inRel.release_dates[0].certification);
+                  else if (usRel && usRel.release_dates[0]?.certification) setAgeRating(usRel.release_dates[0].certification);
+                }
               } else {
                 const creator = data.created_by?.[0]; 
                 if(creator) setDirector(creator);
+                
+                // TV SERIES AGE RATING LOGIC
+                if (data.content_ratings?.results) {
+                  const inRat = data.content_ratings.results.find(r => r.iso_3166_1 === 'IN');
+                  const usRat = data.content_ratings.results.find(r => r.iso_3166_1 === 'US');
+                  if (inRat && inRat.rating) setAgeRating(inRat.rating);
+                  else if (usRat && usRat.rating) setAgeRating(usRat.rating);
+                }
               }
             });
 
@@ -501,7 +534,7 @@
               <div style={{ width: '100%', maxWidth: '350px' }}>
                 <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', marginBottom: '20px' }} />
                 
-                <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center' }}>
+                <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center', boxShadow: '0 10px 20px rgba(0,0,0,0.5)' }}>
                   <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#aaa' }}>Rate this {item.type}</h3>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
                     {[1,2,3,4,5,6,7,8,9,10].map(star => (
@@ -528,14 +561,21 @@
               </div>
 
               <div style={{ flex: 1, minWidth: '300px' }}>
-                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
-                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()}</p>
-                {awardText && <p style={{ color: '#FFD700', fontSize: '16px', fontWeight: 'bold', marginBottom: '20px' }}>{awardText}</p>}
+                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '900', letterSpacing: '-1px' }}>{item.title}</h1>
+                
+                {/* MATURITY RATING ADDED HERE */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px' }}>
+                  <span style={{ color: '#aaa', fontSize: '18px', fontWeight: 'bold' }}>{item.year}</span>
+                  {ageRating && <span className="age-rating">{ageRating}</span>}
+                  <span style={{ color: '#aaa', fontSize: '16px' }}>• {item.type.toUpperCase()}</span>
+                </div>
+
+                {awardText && <p style={{ color: '#FFD700', fontSize: '15px', fontWeight: 'bold', marginBottom: '20px', display: 'inline-block', background: 'rgba(255,215,0,0.1)', padding: '5px 10px', borderRadius: '4px' }}>{awardText}</p>}
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'inline-block', padding: '10px 20px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
-                    <div style={{ fontSize: '30px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
-                    <div style={{ fontSize: '10px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '5px', textAlign: 'center' }}>{r.cat}</div>
+                  <div className="rating-badge" style={{ border: `1px solid ${r.col}`, background: r.bg }}>
+                    <span style={{ fontSize: '30px', fontWeight: '900', color: r.col, marginRight: '10px' }}>{item.rating}</span>
+                    <span style={{ fontSize: '12px', letterSpacing: '2px', color: r.col, fontWeight: '700' }}>{r.cat}</span>
                   </div>
                   
                   <button onClick={() => toggleWatchlist(item)} className="action-btn watchlist-btn">{inWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
@@ -550,7 +590,7 @@
                 {director && (
                   <div style={{ marginBottom: '30px' }}>
                     <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>{item.type === 'movie' ? 'Directed By' : 'Created By'}</h3>
-                    <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer' }} className="cast-card">
+                    <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer', transition: '0.3s' }} className="cast-card">
                       <img src={director.profile_path ? PROFILE_URL + director.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
                       <div style={{textAlign: 'left'}}>
                         <h4 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>{director.name}</h4>
@@ -562,15 +602,17 @@
               </div>
             </div>
 
+            {/* SEASONS AND EPISODES - OLD BELOVED UI RESTORED */}
             {apiType === 'tv' && details && details.seasons && details.seasons.filter(s => s.season_number > 0).length > 0 && (
-              <div style={{ marginTop: '50px', padding: '30px', background: '#0a0a0a', borderRadius: '16px', border: '1px solid #222' }}>
-                <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: '0 0 20px 0'}}>Seasons & Episodes</h2>
+              <div style={{ marginTop: '50px', padding: '30px', background: '#0a0a0a', borderRadius: '16px', border: '1px solid #222', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
                 
-                {/* SEASON BUTTONS FIXED IN OLD UI */}
-                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', borderBottom: '1px solid #222', marginBottom: '20px' }}>
-                  {details.seasons.filter(s => s.season_number > 0).map(s => (
-                    <button key={s.season_number} onClick={() => setActiveSeason(s.season_number)} className={`season-btn ${activeSeason === s.season_number ? 'active' : ''}`}>Season {s.season_number}</button>
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '25px', borderBottom: '1px solid #222', paddingBottom: '15px' }}>
+                  <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: 0}}>Episodes</h2>
+                  <select value={activeSeason} onChange={(e) => setActiveSeason(parseInt(e.target.value))} className="season-select">
+                    {details.seasons.filter(s => s.season_number > 0).map(s => (
+                      <option key={s.season_number} value={s.season_number}>Season {s.season_number}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -592,21 +634,6 @@
                       </div>
                     );
                   })}
-                </div>
-              </div>
-            )}
-
-            {cast.length > 0 && (
-              <div style={{ marginTop: '40px' }}>
-                <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Top Cast</h3>
-                <div className="cast-row">
-                  {cast.map(actor => (
-                    <div key={actor.id} className="cast-card" onClick={() => nav('/person', actor.id)}>
-                      <img src={actor.profile_path ? PROFILE_URL + actor.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} alt={actor.name} />
-                      <h4>{actor.name}</h4>
-                      <p>{actor.character}</p>
-                    </div>
-                  ))}
                 </div>
               </div>
             )}
@@ -683,7 +710,7 @@
             <h1 style={{ fontSize: '48px', fontWeight: '900', letterSpacing: '2px', margin: '0 0 10px 0', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
               THE VISION BEHIND 35<span style={{color: '#FFD700'}}>MM</span>
             </h1>
-            <div style={{ width: '80px', height: '4px', backgroundColor: '#FFD700', margin: '0 auto' }}></div>
+            <div style={{ width: '80px', height: '4px', background: '#FFD700', margin: '0 auto' }}></div>
           </div>
           
           <div style={{ background: '#111', padding: '50px', borderRadius: '16px', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.8)' }}>
@@ -777,7 +804,7 @@
 
           <div style={{ flex: 1 }}><View /></div>
           
-          <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#050505', borderTop: '1px solid #1a1a1a', marginTop: '40px' }}>
+          <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#050505', borderTop: '1px solid #1a1a1a', margin: 'auto 0 0 0' }}>
             <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0', color: '#fff', fontWeight: '900', cursor: 'pointer' }} onClick={() => nav('/about')}>
               35<span style={{color: '#FFD700'}}>MM</span>
             </h2>

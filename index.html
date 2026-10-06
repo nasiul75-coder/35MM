@@ -42,8 +42,13 @@
     .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; }
     .episode-card img { width: 120px; height: 70px; object-fit: cover; border-radius: 8px; }
 
-    .trailer-btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #fff; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 16px; transition: 0.2s; border: none; cursor: pointer; }
+    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; }
+    .trailer-btn { background: #fff; }
     .trailer-btn:hover { background: #FFD700; transform: scale(1.05); }
+    .watchlist-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; }
+    .watchlist-btn:hover { background: #333; transform: scale(1.05); }
+    .share-btn { background: #25D366; color: #fff; }
+    .share-btn:hover { transform: scale(1.05); }
 
     .cast-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; }
     .cast-card { flex: 0 0 120px; text-align: center; cursor: pointer; transition: 0.3s; }
@@ -52,14 +57,19 @@
     .cast-card h4 { margin: 0; font-size: 14px; color: #fff; }
     .cast-card p { margin: 5px 0 0 0; font-size: 12px; color: #aaa; }
 
-    /* Custom Star Rating Hover */
     .star { font-size: 35px; cursor: pointer; transition: 0.2s; color: #444; }
     .star:hover { transform: scale(1.2); }
 
+    /* Genre Buttons */
+    .genre-row { display: flex; gap: 15px; overflow-x: auto; padding: 20px 5%; margin-top: -30px; position: relative; z-index: 10; }
+    .genre-btn { padding: 10px 25px; background: rgba(20,20,20,0.8); border: 1px solid #333; color: white; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-weight: bold; backdrop-filter: blur(5px); }
+    .genre-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); }
+
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .search-bar { width: 160px; }
-      .search-bar:focus { width: 220px; }
+      .search-bar { width: 140px; }
+      .search-bar:focus { width: 200px; }
+      .action-btn { padding: 12px 15px; font-size: 14px; width: 100%; }
     }
   </style>
 </head>
@@ -74,6 +84,12 @@
     const IMG_URL = "https://image.tmdb.org/t/p/w500";
     const BACKDROP_URL = "https://image.tmdb.org/t/p/original";
     const PROFILE_URL = "https://image.tmdb.org/t/p/w185";
+
+    const GENRES = [
+      { id: 28, name: '💥 Action' }, { id: 27, name: '👻 Horror' },
+      { id: 16, name: '🎌 Anime' }, { id: 878, name: '🛸 Sci-Fi' },
+      { id: 35, name: '😂 Comedy' }, { id: 53, name: '🔪 Thriller' }
+    ];
 
     const getRatingData = (score, votes) => {
       if (votes < 50) return { cat: 'AWAITING REVIEWS', col: '#888888', bg: 'rgba(136, 136, 136, 0.15)' };
@@ -122,14 +138,16 @@
       const [topRated, setTopRated] = useState([]);
       const [heroItem, setHeroItem] = useState(null);
 
-      const nav = (path, item = null) => { 
-        setRoute(path); 
-        setSelectedItem(item); 
-        setSearchQuery(''); 
-        window.scrollTo(0, 0); 
-      };
+      // New States for Features
+      const [watchlist, setWatchlist] = useState([]);
+      const [genreResults, setGenreResults] = useState([]);
+      const [activeGenreName, setActiveGenreName] = useState('');
 
       useEffect(() => {
+        // Load Watchlist from LocalStorage on start
+        const savedList = localStorage.getItem('35mm_watchlist');
+        if (savedList) setWatchlist(JSON.parse(savedList));
+
         fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`)
           .then(r => r.json())
           .then(data => {
@@ -147,6 +165,13 @@
           .then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
       }, []);
 
+      const nav = (path, item = null) => { 
+        setRoute(path); 
+        setSelectedItem(item); 
+        setSearchQuery(''); 
+        window.scrollTo(0, 0); 
+      };
+
       const handleSearch = (e) => {
         const query = e.target.value;
         setSearchQuery(query);
@@ -159,6 +184,41 @@
             });
         } else {
           setSearchResults([]);
+        }
+      };
+
+      const handleGenreClick = (genre) => {
+        fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genre.id}&sort_by=popularity.desc`)
+          .then(r => r.json())
+          .then(data => {
+            setGenreResults(data.results.map(m => formatData(m, 'movie')));
+            setActiveGenreName(genre.name);
+            nav('/genre');
+          });
+      };
+
+      const toggleWatchlist = (item) => {
+        let updatedList = [...watchlist];
+        const exists = updatedList.find(i => i.id === item.id);
+        if (exists) {
+          updatedList = updatedList.filter(i => i.id !== item.id);
+        } else {
+          updatedList.push(item);
+        }
+        setWatchlist(updatedList);
+        localStorage.setItem('35mm_watchlist', JSON.stringify(updatedList));
+      };
+
+      const handleShare = (item) => {
+        const shareData = {
+          title: `35 MM: ${item.title}`,
+          text: `Check out ${item.title} on 35 MM! Rating: ${item.rating} 🔥`,
+          url: window.location.href
+        };
+        if (navigator.share) {
+          navigator.share(shareData).catch(err => console.log('Share failed:', err));
+        } else {
+          alert("Link copied! Share it with your friends.");
         }
       };
 
@@ -175,7 +235,7 @@
               <h1 style={{ fontSize: '48px', margin: '0 0 15px 0', fontWeight: '900', textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}>{heroItem.title}</h1>
               <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#ddd', textShadow: '1px 1px 5px rgba(0,0,0,0.8)', maxWidth: '600px' }}>{heroItem.synopsis.substring(0, 150)}...</p>
               <div style={{ marginTop: '20px' }}>
-                <button onClick={() => nav('/detail', heroItem)} style={{ padding: '12px 30px', background: '#FFD700', color: '#000', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }}>▶ View Details</button>
+                <button onClick={() => nav('/detail', heroItem)} className="action-btn trailer-btn">▶ View Details</button>
               </div>
             </div>
           </div>
@@ -205,70 +265,27 @@
         </div>
       );
 
-      const PersonDetail = ({ personId }) => {
-        const [person, setPerson] = useState(null);
-        const [credits, setCredits] = useState([]);
-
-        useEffect(() => {
-          fetch(`${BASE_URL}/person/${personId}?api_key=${API_KEY}&append_to_response=combined_credits`)
-            .then(res => res.json())
-            .then(data => {
-              setPerson(data);
-              let movies = data.combined_credits?.cast || [];
-              if (movies.length === 0) movies = data.combined_credits?.crew || [];
-              
-              const formatted = movies
-                .filter(m => m.poster_path)
-                .sort((a,b) => b.vote_average - a.vote_average)
-                .slice(0, 15)
-                .map(m => formatData(m, m.media_type));
-                
-              setCredits(formatted);
-            });
-        }, [personId]);
-
-        if (!person) return <div style={{padding: '100px 5%', color: '#fff'}}>Loading Profile...</div>;
-
-        return (
-          <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
-            <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-              <img src={person.profile_path ? PROFILE_URL + person.profile_path : 'https://via.placeholder.com/300x450?text=No+Photo'} style={{ width: '100%', maxWidth: '300px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
-              <div style={{ flex: 1, minWidth: '300px' }}>
-                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{person.name}</h1>
-                <p style={{ color: '#FFD700', fontSize: '18px', fontWeight: 'bold' }}>{person.known_for_department}</p>
-                <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', marginTop: '30px'}}>Biography</h3>
-                <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#ccc' }}>{person.biography || "Biography not available."}</p>
-              </div>
-            </div>
-            {credits.length > 0 && <div style={{ marginTop: '50px' }}><MediaRow title="Known For (Movies & Series)" items={credits} /></div>}
-          </div>
-        );
-      };
-
       const ItemDetail = ({ item }) => {
         const [episodes, setEpisodes] = useState([]);
         const [trailer, setTrailer] = useState(null);
         const [cast, setCast] = useState([]);
         const [director, setDirector] = useState(null);
-        const [details, setDetails] = useState(null);
         const [providers, setProviders] = useState(null);
+        const [similar, setSimilar] = useState([]);
         const [myRating, setMyRating] = useState(0);
         
         const r = getRatingData(item.rating, item.votes);
         const awardText = getMockAward(item.rating, item.votes);
         const apiType = item.type === 'series' ? 'tv' : 'movie';
+        const inWatchlist = watchlist.find(i => i.id === item.id);
 
         useEffect(() => {
-          // Load Personal Rating
           const savedRate = localStorage.getItem(`35mm_rating_${item.id}`);
           if (savedRate) setMyRating(parseInt(savedRate));
 
-          // Fetch Details, Videos, Cast
           fetch(`${BASE_URL}/${apiType}/${item.id}?api_key=${API_KEY}&append_to_response=videos,credits`)
             .then(res => res.json())
             .then(data => {
-              setDetails(data);
               if (data.videos?.results?.length > 0) {
                 const official = data.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.videos.results[0];
                 setTrailer(official.key);
@@ -283,13 +300,18 @@
               }
             });
 
-          // Fetch Watch Providers
           fetch(`${BASE_URL}/${apiType}/${item.id}/watch/providers?api_key=${API_KEY}`)
             .then(res => res.json())
             .then(data => {
-              // IN stands for India region. Fallback to US if India is not available.
               if (data.results && data.results.IN) setProviders(data.results.IN);
               else if (data.results && data.results.US) setProviders(data.results.US);
+            });
+            
+          // FETCH SIMILAR MOVIES (New Feature)
+          fetch(`${BASE_URL}/${apiType}/${item.id}/similar?api_key=${API_KEY}`)
+            .then(res => res.json())
+            .then(data => {
+              if(data.results) setSimilar(data.results.map(m => formatData(m, apiType)));
             });
 
           if (apiType === 'tv') {
@@ -299,25 +321,15 @@
           }
         }, [item]);
 
-        const handleRate = (score) => {
-          setMyRating(score);
-          localStorage.setItem(`35mm_rating_${item.id}`, score);
-        };
-
         const WatchProvidersUI = () => {
           if (!providers) return null;
-          // Flatten providers (combine flatrate/streaming, rent, buy)
           const allProviders = [];
           if(providers.flatrate) allProviders.push(...providers.flatrate);
           if(providers.rent) allProviders.push(...providers.rent);
           if(providers.buy) allProviders.push(...providers.buy);
-          
-          // Remove duplicates
           const uniqueProviders = Array.from(new Set(allProviders.map(a => a.provider_id)))
             .map(id => allProviders.find(a => a.provider_id === id));
-
           if (uniqueProviders.length === 0) return null;
-
           return (
             <div style={{ marginBottom: '30px' }}>
               <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Available to Watch On</h3>
@@ -341,12 +353,11 @@
               <div style={{ width: '100%', maxWidth: '350px' }}>
                 <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', marginBottom: '20px' }} />
                 
-                {/* Personal User Rating UI */}
                 <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center' }}>
                   <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#aaa' }}>Rate this {item.type}</h3>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
                     {[1,2,3,4,5,6,7,8,9,10].map(star => (
-                      <span key={star} onClick={() => handleRate(star)} className="star" style={{ color: star <= myRating ? '#FFD700' : '#333' }}>★</span>
+                      <span key={star} onClick={() => {setMyRating(star); localStorage.setItem(`35mm_rating_${item.id}`, star)}} className="star" style={{ color: star <= myRating ? '#FFD700' : '#333' }}>★</span>
                     ))}
                   </div>
                   {myRating > 0 && <p style={{ margin: '10px 0 0 0', color: '#FFD700', fontWeight: 'bold', fontSize: '14px' }}>You rated this {myRating} / 10</p>}
@@ -355,33 +366,35 @@
 
               <div style={{ flex: 1, minWidth: '300px' }}>
                 <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
-                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()} {details && details.runtime ? `• ${details.runtime} mins` : ''}</p>
+                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()}</p>
                 
                 {awardText && <p style={{ color: '#FFD700', fontSize: '16px', fontWeight: 'bold', marginBottom: '20px' }}>{awardText}</p>}
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'inline-block', padding: '15px 30px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
-                    <div style={{ fontSize: '38px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
-                    <div style={{ fontSize: '12px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '10px', textAlign: 'center' }}>{r.cat}</div>
+                {/* Rating & Actions Buttons Row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'inline-block', padding: '10px 20px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
+                    <div style={{ fontSize: '30px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
+                    <div style={{ fontSize: '10px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '5px', textAlign: 'center' }}>{r.cat}</div>
                   </div>
                   
-                  {trailer && (
-                    <a href={`https://www.youtube.com/watch?v=${trailer}`} target="_blank" rel="noreferrer" className="trailer-btn">
-                      ▶ Watch Trailer
-                    </a>
-                  )}
+                  {trailer && <a href={`https://www.youtube.com/watch?v=${trailer}`} target="_blank" rel="noreferrer" className="action-btn trailer-btn">▶ Trailer</a>}
+                  
+                  <button onClick={() => toggleWatchlist(item)} className="action-btn watchlist-btn">
+                    {inWatchlist ? '✓ In Watchlist' : '+ Watchlist'}
+                  </button>
+
+                  <button onClick={() => handleShare(item)} className="action-btn share-btn">📤 Share</button>
                 </div>
                 
                 <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
                 <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc', marginBottom: '30px' }}>{item.synopsis}</p>
 
-                {/* Where to Watch */}
                 <WatchProvidersUI />
 
                 {director && (
                   <div style={{ marginBottom: '30px' }}>
                     <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>{item.type === 'movie' ? 'Directed By' : 'Created By'}</h3>
-                    <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer', transition: '0.3s' }} className="cast-card">
+                    <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer' }} className="cast-card">
                       <img src={director.profile_path ? PROFILE_URL + director.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
                       <div style={{textAlign: 'left'}}>
                         <h4 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>{director.name}</h4>
@@ -393,79 +406,48 @@
               </div>
             </div>
 
-            {cast.length > 0 && (
-              <div style={{ marginTop: '40px' }}>
-                <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Top Cast</h3>
-                <div className="cast-row">
-                  {cast.map(actor => (
-                    <div key={actor.id} className="cast-card" onClick={() => nav('/person', actor.id)}>
-                      <img src={actor.profile_path ? PROFILE_URL + actor.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} alt={actor.name} />
-                      <h4>{actor.name}</h4>
-                      <p>{actor.character}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {episodes.length > 0 && (
-              <div style={{ marginTop: '40px' }}>
-                <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Season 1 Episodes</h3>
-                {episodes.map(ep => {
-                  const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
-                  const epVotes = ep.vote_count || 0;
-                  const epRData = getRatingData(epRating, epVotes);
-                  return (
-                    <div key={ep.id} className="episode-card">
-                      <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} />
-                      <div style={{ flex: 1 }}>
-                        <strong style={{ fontSize: '18px' }}>{ep.episode_number}. {ep.name}</strong>
-                        <p style={{ fontSize: '14px', color: '#aaa', margin: '5px 0' }}>{(ep.overview || "No description available.").substring(0, 100)}...</p>
-                      </div>
-                      <div style={{ padding: '8px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '130px' }}>
-                        <div style={{ fontWeight: 'bold', fontSize: '20px' }}>{epRating}</div>
-                        <div style={{ fontSize: '10px', letterSpacing: '1px' }}>{epRData.cat}</div>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Recommendations / Similar */}
+            {similar.length > 0 && (
+              <div style={{ marginTop: '50px', paddingTop: '20px', borderTop: '1px solid #222' }}>
+                <MediaRow title="You Might Also Like..." items={similar} />
               </div>
             )}
           </div>
         );
       };
 
-      const SearchResults = () => (
+      // Custom Grid Views for Search, Genre, and Watchlist
+      const GridView = ({ title, items, emptyMsg }) => (
         <div style={{ paddingTop: '100px', minHeight: '80vh' }}>
-          <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>
-            Search Results for "{searchQuery}"
-          </h2>
-          <div className="media-grid">
-            {searchResults.map(item => {
-              const r = getRatingData(item.rating, item.votes);
-              return (
-                <div key={item.id} className="media-card" onClick={() => nav('/detail', item)}>
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, backdropFilter: 'blur(5px)' }}>
-                    {item.rating}
+          <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>{title}</h2>
+          {items.length === 0 ? <p style={{ marginLeft: '5%', color: '#888' }}>{emptyMsg}</p> : 
+            <div className="media-grid">
+              {items.map(item => {
+                const r = getRatingData(item.rating, item.votes);
+                return (
+                  <div key={item.id} className="media-card" onClick={() => nav('/detail', item)}>
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2 }}>{item.rating}</div>
+                    <img src={item.image} />
+                    <div style={{ padding: '15px' }}><h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3><p style={{ margin: 0, color: '#888', fontSize: '12px' }}>{item.year}</p></div>
                   </div>
-                  <img src={item.image} alt={item.title} />
-                  <div style={{ padding: '15px' }}>
-                    <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3>
-                    <p style={{ margin: 0, color: '#888', fontSize: '12px' }}>{item.year} • {item.type.toUpperCase()}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          }
         </div>
       );
 
       let View = () => {
-        if (searchQuery.length > 2) return <SearchResults />;
+        if (searchQuery.length > 2) return <GridView title={`Search Results for "${searchQuery}"`} items={searchResults} emptyMsg="No results found." />;
         return (
           <>
             <HeroBanner />
-            <div style={{ position: 'relative', zIndex: 10, marginTop: '-50px' }}>
+            <div className="genre-row">
+              {GENRES.map(g => (
+                <button key={g.id} className="genre-btn" onClick={() => handleGenreClick(g)}>{g.name}</button>
+              ))}
+            </div>
+            <div style={{ position: 'relative', zIndex: 10, marginTop: '10px' }}>
               <MediaRow title="Trending Movies" items={trendingMovies} />
               <MediaRow title="Popular Series" items={trendingSeries} />
               <MediaRow title="Top Rated Masterpieces" items={topRated} />
@@ -475,7 +457,8 @@
       };
       
       if(route === '/detail') View = () => <ItemDetail item={selectedItem} />;
-      if(route === '/person') View = () => <PersonDetail personId={selectedItem} />;
+      if(route === '/genre') View = () => <GridView title={`${activeGenreName} Movies`} items={genreResults} emptyMsg="Loading..." />;
+      if(route === '/watchlist') View = () => <GridView title="My Watchlist" items={watchlist} emptyMsg="Your watchlist is empty. Add some movies!" />;
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -484,22 +467,15 @@
               35<span style={{color: '#FFD700'}}>MM</span>
             </div>
             <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-              <input 
-                type="text" 
-                className="search-bar" 
-                placeholder="Search movies, series..." 
-                value={searchQuery}
-                onChange={handleSearch}
-              />
+              <input type="text" className="search-bar" placeholder="Search..." value={searchQuery} onChange={handleSearch} />
               <div className="nav-links" style={{ display: 'flex', gap: '20px' }}>
                 <button onClick={() => nav('/')} className="nav-btn">Home</button>
+                <button onClick={() => nav('/watchlist')} style={{...navBtn, color: '#FFD700', border: '1px solid #FFD700', padding: '6px 15px', borderRadius: '20px'}}>My List</button>
               </div>
             </div>
           </nav>
 
-          <div style={{ flex: 1 }}>
-            <View />
-          </div>
+          <div style={{ flex: 1 }}><View /></div>
           
           <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#050505', borderTop: '1px solid #1a1a1a', marginTop: '40px' }}>
             <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0', color: '#fff', fontWeight: '900' }}>35<span style={{color: '#FFD700'}}>MM</span></h2>
@@ -509,6 +485,7 @@
         </div>
       );
     }
+    const navBtn = { background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', fontSize: '15px', fontWeight: '600', transition: '0.2s' };
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>

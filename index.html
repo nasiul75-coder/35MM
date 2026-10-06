@@ -35,7 +35,6 @@
     .media-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
     .media-card img { width: 100%; height: 300px; object-fit: cover; }
 
-    /* FIXED: SMOOTH CAROUSEL CSS */
     .carousel-container { position: relative; width: 100%; height: 75vh; overflow: hidden; background: #000; }
     .carousel-slide { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
     .carousel-slide.active { opacity: 1; z-index: 1; }
@@ -236,17 +235,15 @@
         }
       };
 
-      // FIXED: SMOOTH AUTO-SLIDING HERO CAROUSEL
       const HeroCarousel = ({ items }) => {
         const [currentIndex, setCurrentIndex] = useState(0);
-        // Changed to top 10 movies for more variety
         const topItems = items ? items.slice(0, 10) : [];
 
         useEffect(() => {
           if (topItems.length === 0) return;
           const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % topItems.length);
-          }, 5000); // 5 Seconds smooth interval
+          }, 5000); 
           return () => clearInterval(timer);
         }, [topItems.length]);
 
@@ -623,6 +620,7 @@
       };
       
       if(route === '/detail') View = () => <ItemDetail item={selectedItem} />;
+      if(route === '/person') View = () => <PersonDetail personId={selectedItem} />;
       if(route === '/genre') View = () => <GridView title={`${activeGenreName} Movies`} items={genreResults} emptyMsg="Loading..." />;
       if(route === '/watchlist') View = () => <GridView title="My Watchlist" items={watchlist} emptyMsg="Your watchlist is empty. Add some movies!" />;
       if(route === '/about') View = () => <AboutPage />; 

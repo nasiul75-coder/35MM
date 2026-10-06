@@ -37,11 +37,14 @@
     .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; }
     .episode-card img { width: 120px; height: 70px; object-fit: cover; border-radius: 8px; }
 
-    /* Mobile Responsive Nav */
+    /* Trailer Button Style */
+    .trailer-btn { display: inline-flex; align-items: center; gap: 10px; padding: 15px 30px; background: #fff; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 16px; transition: 0.2s; border: none; cursor: pointer; }
+    .trailer-btn:hover { background: #FFD700; transform: scale(1.05); }
+
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .search-bar { width: 150px; }
-      .search-bar:focus { width: 200px; }
+      .search-bar { width: 160px; }
+      .search-bar:focus { width: 220px; }
     }
   </style>
 </head>
@@ -66,16 +69,20 @@
       return { cat: 'ABSOLUTE TRASH', col: '#FF0000', bg: 'rgba(255, 0, 0, 0.15)' };
     };
 
-    const formatData = (item, type) => ({
-      id: item.id,
-      title: item.title || item.name,
-      year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4),
-      rating: item.vote_average ? item.vote_average.toFixed(1) : '0.0',
-      image: item.poster_path ? IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster',
-      backdrop: item.backdrop_path ? BACKDROP_URL + item.backdrop_path : '',
-      synopsis: item.overview || 'No synopsis available.',
-      type: item.media_type || type
-    });
+    const formatData = (item, type) => {
+      let finalType = item.media_type || type;
+      if (finalType === 'tv') finalType = 'series'; // Convert tv to series for display
+      return {
+        id: item.id,
+        title: item.title || item.name,
+        year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4),
+        rating: item.vote_average ? item.vote_average.toFixed(1) : '0.0',
+        image: item.poster_path ? IMG_URL + item.poster_path : 'https://via.placeholder.com/500x750?text=No+Poster',
+        backdrop: item.backdrop_path ? BACKDROP_URL + item.backdrop_path : '',
+        synopsis: item.overview || 'No synopsis available.',
+        type: finalType
+      };
+    };
 
     function App() {
       const [route, setRoute] = useState('/');
@@ -91,7 +98,7 @@
       const nav = (path, item = null) => { 
         setRoute(path); 
         setSelectedItem(item); 
-        setSearchQuery(''); // Clear search on navigation
+        setSearchQuery(''); 
         window.scrollTo(0, 0); 
       };
 
@@ -127,27 +134,6 @@
           setSearchResults([]);
         }
       };
-
-      const Navbar = () => (
-        <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }} onClick={() => nav('/')}>
-            35<span style={{color: '#FFD700'}}>MM</span>
-          </div>
-          
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <input 
-              type="text" 
-              className="search-bar" 
-              placeholder="Search movies, series..." 
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            <div className="nav-links" style={{ display: 'flex', gap: '20px' }}>
-              <button onClick={() => nav('/')} className="nav-btn">Home</button>
-            </div>
-          </div>
-        </nav>
-      );
 
       const HeroBanner = () => {
         if (!heroItem) return <div className="hero-banner"></div>;
@@ -219,10 +205,27 @@
 
       const ItemDetail = ({ item }) => {
         const [episodes, setEpisodes] = useState([]);
+        const [trailer, setTrailer] = useState(null);
         const r = getRatingData(item.rating);
 
+        // Map 'series' back to 'tv' for API calls
+        const apiType = item.type === 'series' ? 'tv' : 'movie';
+
         useEffect(() => {
-          if (item.type === 'tv' || item.type === 'series') {
+          // Fetch Trailer
+          fetch(`${BASE_URL}/${apiType}/${item.id}/videos?api_key=${API_KEY}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.results && data.results.length > 0) {
+                // Find Official Trailer
+                const official = data.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
+                if (official) setTrailer(official.key);
+                else setTrailer(data.results[0].key); // Fallback to any video if trailer not found
+              }
+            });
+
+          // Fetch Episodes if Series
+          if (apiType === 'tv') {
             fetch(`${BASE_URL}/tv/${item.id}/season/1?api_key=${API_KEY}`)
               .then(res => res.json())
               .then(data => {
@@ -238,11 +241,20 @@
               <img src={item.image} style={{ width: '100%', maxWidth: '350px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
               <div style={{ flex: 1, minWidth: '300px' }}>
                 <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
-                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '30px' }}>{item.year} • {item.type.toUpperCase()}</p>
+                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '20px' }}>{item.year} • {item.type.toUpperCase()}</p>
                 
-                <div style={{ display: 'inline-block', padding: '15px 30px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px', marginBottom: '30px' }}>
-                  <div style={{ fontSize: '42px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
-                  <div style={{ fontSize: '14px', letterSpacing: '3px', color: r.col, fontWeight: '700', marginTop: '10px' }}>{r.cat}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'inline-block', padding: '15px 30px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
+                    <div style={{ fontSize: '38px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
+                    <div style={{ fontSize: '12px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '10px', textAlign: 'center' }}>{r.cat}</div>
+                  </div>
+                  
+                  {/* Trailer Button */}
+                  {trailer && (
+                    <a href={`https://www.youtube.com/watch?v=${trailer}`} target="_blank" rel="noreferrer" className="trailer-btn">
+                      ▶ Watch Trailer
+                    </a>
+                  )}
                 </div>
                 
                 <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
@@ -292,10 +304,33 @@
       
       if(route === '/detail') View = () => <ItemDetail item={selectedItem} />;
 
+      // Nav code embedded directly to fix the keyboard losing focus bug
       return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <Navbar />
-          <div style={{ flex: 1 }}><View /></div>
+          
+          <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }} onClick={() => nav('/')}>
+              35<span style={{color: '#FFD700'}}>MM</span>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <input 
+                type="text" 
+                className="search-bar" 
+                placeholder="Search movies, series..." 
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+              <div className="nav-links" style={{ display: 'flex', gap: '20px' }}>
+                <button onClick={() => nav('/')} className="nav-btn">Home</button>
+              </div>
+            </div>
+          </nav>
+
+          <div style={{ flex: 1 }}>
+            <View />
+          </div>
+          
           <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#050505', borderTop: '1px solid #1a1a1a', marginTop: '40px' }}>
             <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0', color: '#fff', fontWeight: '900' }}>35<span style={{color: '#FFD700'}}>MM</span></h2>
             <p style={{ color: '#666', fontSize: '14px', margin: '0' }}>Powered by TMDB API • Custom Rated</p>

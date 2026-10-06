@@ -23,6 +23,7 @@
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
 
+    /* SPLASH SCREEN */
     .splash-screen { position: fixed; inset: 0; background: #020202; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOutSplash 0.8s ease 3s forwards; overflow: hidden; }
     .splash-screen::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0) 100%); background-size: 100% 4px; pointer-events: none; z-index: 2; animation: scrollLines 0.5s linear infinite; }
     .splash-screen::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,1) 100%); z-index: 3; pointer-events: none; }
@@ -48,14 +49,17 @@
     .media-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
     .media-card img { width: 100%; height: 300px; object-fit: cover; }
 
+    /* FIXED SMOOTH CAROUSEL */
     .carousel-container { position: relative; width: 100%; height: 80vh; overflow: hidden; background: #000; }
     .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.8s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
     .carousel-slide.active { opacity: 1; z-index: 1; }
     .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.7) 40%, transparent 100%); z-index: 2; pointer-events: none; }
     .hero-content { position: relative; z-index: 3; padding: 50px 5%; max-width: 800px; }
     
-    .video-background { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; z-index: 1; pointer-events: none; border: none; }
     .fallback-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
+    .video-background { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 56.25vw; min-height: 100vh; min-width: 177.77vh; z-index: 1; pointer-events: none; border: none; animation: slowFadeIn 2s ease 1s forwards; opacity: 0; }
+    
+    @keyframes slowFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
 
     .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
     .carousel-btn:hover { background: var(--primary); color: black; }
@@ -65,9 +69,17 @@
     .indicator { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
     .indicator.active { background: var(--primary); transform: scale(1.3); }
 
-    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; }
+    .episode-card { display: flex; gap: 15px; background: #111; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #222; align-items: center; transition: 0.2s; }
+    .episode-card:hover { border-color: #444; background: #151515; }
+    .episode-card img { width: 160px; height: 90px; object-fit: cover; border-radius: 8px; }
+
+    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; }
     .trailer-btn { background: #fff; }
     .trailer-btn:hover { background: #FFD700; transform: scale(1.05); }
+    .watchlist-btn { background: #1a1a1a; color: #fff; border: 1px solid #444; }
+    .watchlist-btn:hover { background: #333; transform: scale(1.05); }
+    .share-btn { background: #25D366; color: #fff; }
+    .share-btn:hover { transform: scale(1.05); }
 
     .cast-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; }
     .cast-card { flex: 0 0 120px; text-align: center; cursor: pointer; transition: 0.3s; }
@@ -83,8 +95,9 @@
     .genre-btn { padding: 10px 25px; background: rgba(20,20,20,0.8); border: 1px solid #333; color: white; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-weight: bold; backdrop-filter: blur(5px); }
     .genre-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); }
 
-    .season-select { background: #222; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; outline: none; }
-    .season-select:focus { border-color: #FFD700; }
+    .season-btn { padding: 10px 20px; background: #222; color: #fff; border: 1px solid #333; border-radius: 20px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: 0.2s; }
+    .season-btn:hover { background: #333; }
+    .season-btn.active { background: #FFD700; color: #000; border-color: #FFD700; }
 
     .review-textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; outline: none; transition: 0.3s; }
     .review-textarea:focus { border-color: #FFD700; }
@@ -97,9 +110,10 @@
       .search-bar { width: 140px; }
       .search-bar:focus { width: 180px; }
       .action-btn { padding: 12px 15px; font-size: 14px; width: 100%; }
+      .episode-card { flex-direction: column; text-align: left; align-items: flex-start; }
+      .episode-card img { width: 100% !important; height: auto !important; }
       .carousel-btn { display: none; } 
       .splash-logo { font-size: 50px; }
-      .nf-action-buttons { flex-direction: column; }
     }
   </style>
 </head>
@@ -190,24 +204,20 @@
         const savedUser = localStorage.getItem('35mm_user');
         if (savedUser) setUser(savedUser);
 
-        fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`).then(r => r.json()).then(data => setTrendingMovies(data.results.map(m => formatData(m, 'movie'))));
+        fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`).then(r => r.json()).then(data => {
+          const formatted = data.results.map(m => formatData(m, 'movie'));
+          setTrendingMovies(formatted);
+          // SIMPLE RANDOMIZATION (Fixes API Glitches)
+          const valid = formatted.filter(i => i.backdrop);
+          const shuffled = valid.sort(() => 0.5 - Math.random()).slice(0, 10);
+          setHeroRandomMovies(shuffled);
+        });
+
         fetch(`${BASE_URL}/trending/tv/day?api_key=${API_KEY}`).then(r => r.json()).then(data => setTrendingSeries(data.results.map(s => formatData(s, 'series'))));
         fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}`).then(r => r.json()).then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`).then(r => r.json()).then(data => setNowPlaying(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`).then(r => r.json()).then(data => setUpcoming(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/tv/top_rated?api_key=${API_KEY}`).then(r => r.json()).then(data => setTopSeries(data.results.map(s => formatData(s, 'series'))));
-
-        Promise.all([
-          fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`).then(r => r.json()),
-          fetch(`${BASE_URL}/trending/tv/week?api_key=${API_KEY}`).then(r => r.json()),
-          fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`).then(r => r.json())
-        ]).then(([trendM, trendS, nowP]) => {
-          let combined = [...trendM.results.map(m => formatData(m, 'movie')), ...trendS.results.map(s => formatData(s, 'series')), ...nowP.results.map(m => formatData(m, 'movie'))];
-          let unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
-          let valid = unique.filter(i => i.backdrop);
-          let shuffled = valid.sort(() => Math.random() - 0.5).slice(0, 15);
-          setHeroRandomMovies(shuffled);
-        });
 
         return () => clearTimeout(splashTimer);
       }, []);
@@ -266,16 +276,16 @@
         );
       };
 
+      // FIXED SMOOTH CAROUSEL 
       const HeroCarousel = ({ items }) => {
         const [currentIndex, setCurrentIndex] = useState(0);
         const [videoKey, setVideoKey] = useState(null);
-        const [isMuted, setIsMuted] = useState(true);
-        const topItems = items ? items.slice(0, 15) : [];
+        const topItems = items ? items.slice(0, 10) : [];
 
         useEffect(() => {
           if (topItems.length === 0) return;
           const timer = setInterval(() => {
-            setCurrentIndex((prev) => { setIsMuted(true); return (prev + 1) % topItems.length; });
+            setCurrentIndex((prev) => (prev + 1) % topItems.length);
           }, 15000); 
           return () => clearInterval(timer);
         }, [topItems.length]);
@@ -295,15 +305,15 @@
                     setVideoKey(official.key);
                   }
                 });
-            }, 1000);
+            }, 1000); // 1 second delay to fetch trailer safely
             return () => { isMounted = false; clearTimeout(delay); };
           }
         }, [currentIndex, items]);
 
         if (topItems.length === 0) return <div className="carousel-container"></div>;
 
-        const nextSlide = () => { setCurrentIndex((prev) => (prev + 1) % topItems.length); setIsMuted(true); };
-        const prevSlide = () => { setCurrentIndex((prev) => (prev - 1 + topItems.length) % topItems.length); setIsMuted(true); };
+        const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % topItems.length);
+        const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + topItems.length) % topItems.length);
 
         return (
           <div className="carousel-container">
@@ -312,10 +322,17 @@
               const isCurrent = idx === currentIndex;
               return (
                 <div key={item.id} className={`carousel-slide ${isCurrent ? 'active' : ''}`}>
-                  <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})`, opacity: (isCurrent && videoKey) ? 0 : 1, transition: 'opacity 2s ease 1.5s' }}></div>
                   
+                  {/* Image ALWAYS stays at opacity 1, preventing black flashes */}
+                  <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})` }}></div>
+                  
+                  {/* Video fades in SLOWLY on top of the image */}
                   {isCurrent && videoKey && (
-                    <iframe className="video-background" src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`} allow="autoplay; encrypted-media"></iframe>
+                    <iframe 
+                      className="video-background" 
+                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`} 
+                      allow="autoplay; encrypted-media">
+                    </iframe>
                   )}
 
                   <div className="hero-gradient"></div>
@@ -332,12 +349,6 @@
                       </div>
                     </div>
                   )}
-
-                  {isCurrent && videoKey && (
-                    <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} style={{ position: 'absolute', bottom: '100px', right: '5%', zIndex: 20, background: 'rgba(0,0,0,0.5)', border: '1px solid #666', color: '#fff', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer', fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.3s', backdropFilter: 'blur(5px)' }} title={isMuted ? "Unmute" : "Mute"}>
-                      {isMuted ? '🔇' : '🔊'}
-                    </button>
-                  )}
                 </div>
               );
             })}
@@ -345,7 +356,7 @@
             <button className="carousel-btn right" onClick={nextSlide}>❯</button>
             <div className="carousel-indicators">
               {topItems.map((_, idx) => (
-                <div key={idx} className={`indicator ${idx === currentIndex ? 'active' : ''}`} onClick={() => {setCurrentIndex(idx); setIsMuted(true);}}></div>
+                <div key={idx} className={`indicator ${idx === currentIndex ? 'active' : ''}`} onClick={() => setCurrentIndex(idx)}></div>
               ))}
             </div>
           </div>
@@ -376,9 +387,7 @@
         </div>
       );
 
-      // ==========================================
-      // NEW NETFLIX-STYLE ITEM DETAIL PAGE
-      // ==========================================
+      // OLD BELOVED UI RESTORED (WITH TOP VIDEO PLAYER)
       const ItemDetail = ({ item }) => {
         const [episodes, setEpisodes] = useState([]);
         const [trailer, setTrailer] = useState(null);
@@ -389,7 +398,6 @@
         const [myRating, setMyRating] = useState(0);
         const [details, setDetails] = useState(null);
         const [activeSeason, setActiveSeason] = useState(1);
-        const [isDetailMuted, setIsDetailMuted] = useState(true);
         
         const [myReviewText, setMyReviewText] = useState("");
         const [savedReview, setSavedReview] = useState(null);
@@ -460,11 +468,12 @@
           if (uniqueProviders.length === 0) return null;
           return (
             <div style={{ marginBottom: '30px' }}>
+              <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Available to Watch On</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
                 {uniqueProviders.map(p => (
                   <div key={p.provider_id} title={p.provider_name} style={{ display: 'flex', alignItems: 'center', background: '#1a1a1a', padding: '8px 15px', borderRadius: '12px', border: '1px solid #333' }}>
-                    <img src={IMG_URL + p.logo_path} style={{ width: '30px', height: '30px', borderRadius: '6px', marginRight: '10px' }} />
-                    <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{p.provider_name}</span>
+                    <img src={IMG_URL + p.logo_path} style={{ width: '35px', height: '35px', borderRadius: '8px', marginRight: '10px' }} />
+                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{p.provider_name}</span>
                   </div>
                 ))}
               </div>
@@ -473,179 +482,140 @@
         };
 
         return (
-          <div style={{ width: '100%', minHeight: '100vh', background: '#050505', paddingBottom: '40px' }}>
+          <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
+            <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px' }}>← Back</button>
             
-            <button onClick={() => nav('/')} style={{ position: 'absolute', top: '90px', left: '20px', zIndex: 100, background: 'rgba(0,0,0,0.6)', border: '1px solid #333', color: '#fff', padding: '10px 15px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold' }}>←</button>
-
-            {/* TOP VIDEO HERO - NETFLIX STYLE */}
-            <div style={{ position: 'relative', width: '100%', height: '55vh', background: '#000', overflow: 'hidden' }}>
-              <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})`, opacity: (trailer) ? 0 : 1, transition: 'opacity 2s ease 1.5s' }}></div>
-              
-              {trailer && (
-                <iframe className="video-background" src={`https://www.youtube.com/embed/${trailer}?autoplay=1&mute=${isDetailMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailer}&modestbranding=1&playsinline=1`} allow="autoplay; encrypted-media"></iframe>
-              )}
-
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(5,5,5,0.8) 0%, transparent 20%, transparent 70%, #050505 100%)', pointerEvents: 'none' }}></div>
-              
-              {trailer && (
-                <button onClick={(e) => setIsDetailMuted(!isDetailMuted)} style={{ position: 'absolute', bottom: '30px', right: '5%', zIndex: 20, background: 'rgba(0,0,0,0.5)', border: '1px solid #666', color: '#fff', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.3s', backdropFilter: 'blur(5px)' }} title={isDetailMuted ? "Unmute" : "Mute"}>
-                  {isDetailMuted ? '🔇' : '🔊'}
-                </button>
-              )}
-            </div>
-
-            <div style={{ padding: '0 5%', marginTop: '-30px', position: 'relative', zIndex: 10, maxWidth: '1200px', margin: '0 auto' }}>
-              
-              {/* TITLE & NETFLIX METADATA */}
-              <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#aaa', fontSize: '13px', marginBottom: '20px', fontWeight: 'bold', flexWrap: 'wrap' }}>
-                <span style={{ color: '#4CAF50' }}>{item.year}</span>
-                <span style={{ background: '#333', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', color: '#fff' }}>HD</span>
-                <span>{item.type.toUpperCase()}</span>
-                {details && details.runtime && <span>{details.runtime}m</span>}
-                {apiType === 'tv' && details && details.number_of_seasons && <span>{details.number_of_seasons} Seasons</span>}
+            {/* NEW: TRAILER CLIP AT THE TOP WITH SOUND */}
+            {trailer && (
+              <div style={{ width: '100%', maxWidth: '1000px', margin: '0 auto 40px auto', borderRadius: '16px', overflow: 'hidden', aspectRatio: '16/9', background: '#000', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <iframe 
+                  src={`https://www.youtube.com/embed/${trailer}?autoplay=1&mute=0&controls=1&rel=0&modestbranding=1`} 
+                  style={{ width: '100%', height: '100%', border: 'none' }} 
+                  allow="autoplay; encrypted-media; fullscreen"
+                ></iframe>
               </div>
+            )}
 
-              {/* CUSTOM 35MM RATING ROW */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'inline-block', padding: '6px 15px', border: `1px solid ${r.col}`, background: r.bg, borderRadius: '8px' }}>
-                  <span style={{ fontSize: '20px', fontWeight: '900', color: r.col, marginRight: '8px' }}>{item.rating}</span>
-                  <span style={{ fontSize: '12px', letterSpacing: '1px', color: r.col, fontWeight: '700' }}>{r.cat}</span>
-                </div>
-                {awardText && <span style={{ color: '#FFD700', fontSize: '14px', fontWeight: 'bold' }}>{awardText}</span>}
-              </div>
-
-              {/* NETFLIX ACTION BUTTONS (PLAY / DOWNLOAD) */}
-              <div className="nf-action-buttons" style={{ display: 'flex', gap: '15px', marginBottom: '25px' }}>
-                <button onClick={() => trailer ? window.open(`https://www.youtube.com/watch?v=${trailer}`) : alert('Trailer not available')} style={{ flex: 1, background: '#fff', color: '#000', padding: '12px', borderRadius: '4px', fontWeight: 'bold', fontSize: '16px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer', transition: '0.2s' }}>
-                  <span style={{fontSize: '20px'}}>▶</span> Play Trailer
-                </button>
-                <button onClick={() => { document.getElementById('providers-section').scrollIntoView({behavior: 'smooth'}) }} style={{ flex: 1, background: '#2a2a2a', color: '#fff', padding: '12px', borderRadius: '4px', fontWeight: 'bold', fontSize: '16px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', cursor: 'pointer', transition: '0.2s' }}>
-                  <span style={{fontSize: '20px'}}>⬇</span> Where to Watch
-                </button>
-              </div>
-
-              {/* SYNOPSIS */}
-              <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#ddd', marginBottom: '15px' }}>{item.synopsis}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
               
-              {/* CAST / GENRE MINIMALIST */}
-              {cast.length > 0 && <p style={{ fontSize: '13px', color: '#777', margin: '0 0 5px 0' }}>Cast: <span style={{color: '#aaa'}}>{cast.slice(0, 4).map(c => c.name).join(', ')}...</span> <span style={{color: '#fff', cursor: 'pointer', fontWeight: 'bold'}} onClick={() => document.getElementById('cast-section').scrollIntoView()}>more</span></p>}
-              {director && <p style={{ fontSize: '13px', color: '#777', margin: '0 0 20px 0' }}>{apiType === 'movie' ? 'Director' : 'Creator'}: <span style={{color: '#aaa'}}>{director.name}</span></p>}
-
-              {/* NETFLIX ICON ROW (+ List, Rate, Share) */}
-              <div style={{ display: 'flex', gap: '40px', margin: '20px 0 30px', paddingBottom: '20px', borderBottom: '1px solid #222' }}>
-                <div onClick={() => toggleWatchlist(item)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', gap: '8px', transition: '0.2s' }}>
-                  <span style={{ fontSize: '26px', color: inWatchlist ? '#fff' : '#ccc', lineHeight: '1' }}>{inWatchlist ? '✓' : '+'}</span>
-                  <span style={{ fontSize: '11px', color: '#888', fontWeight: 'bold' }}>My List</span>
-                </div>
-                <div onClick={() => document.getElementById('rating-section').scrollIntoView({behavior: 'smooth'})} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', gap: '8px', transition: '0.2s' }}>
-                  <span style={{ fontSize: '22px', color: '#ccc', lineHeight: '1', marginTop: '2px' }}>👍</span>
-                  <span style={{ fontSize: '11px', color: '#888', fontWeight: 'bold' }}>Rate</span>
-                </div>
-                <div onClick={() => handleShare(item)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', cursor: 'pointer', gap: '8px', transition: '0.2s' }}>
-                  <span style={{ fontSize: '22px', color: '#ccc', lineHeight: '1', marginTop: '2px' }}>➤</span>
-                  <span style={{ fontSize: '11px', color: '#888', fontWeight: 'bold' }}>Share</span>
-                </div>
-              </div>
-
-              <div id="providers-section"><WatchProvidersUI /></div>
-
-              {/* RATE & REVIEW SECTION */}
-              <div id="rating-section" style={{ background: '#111', padding: '25px', borderRadius: '12px', border: '1px solid #333', marginBottom: '30px' }}>
-                <h3 style={{ margin: '0 0 15px 0', fontSize: '18px', color: '#fff', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>Your Personal Rating & Review</h3>
+              <div style={{ width: '100%', maxWidth: '350px' }}>
+                <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', marginBottom: '20px' }} />
                 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
-                  <div style={{ display: 'flex', gap: '2px' }}>
+                <div style={{ background: '#111', padding: '20px', borderRadius: '16px', border: '1px solid #333', textAlign: 'center' }}>
+                  <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#aaa' }}>Rate this {item.type}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
                     {[1,2,3,4,5,6,7,8,9,10].map(star => (
-                      <span key={star} onClick={() => {if(!user){setShowLogin(true); return;} setMyRating(star); localStorage.setItem(`35mm_rating_${item.id}`, star)}} className="star" style={{ color: star <= myRating ? '#FFD700' : '#333', fontSize: '30px' }}>★</span>
+                      <span key={star} onClick={() => {if(!user){setShowLogin(true); return;} setMyRating(star); localStorage.setItem(`35mm_rating_${item.id}`, star)}} className="star" style={{ color: star <= myRating ? '#FFD700' : '#333' }}>★</span>
                     ))}
                   </div>
-                  {myRating > 0 && <span style={{ color: '#FFD700', fontWeight: 'bold', fontSize: '16px', marginLeft: '10px' }}>{myRating} / 10</span>}
+                  {myRating > 0 && <p style={{ margin: '10px 0 0 0', color: '#FFD700', fontWeight: 'bold', fontSize: '14px' }}>You rated this {myRating} / 10</p>}
+                  
+                  <div style={{ marginTop: '20px', borderTop: '1px solid #333', paddingTop: '15px' }}>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#aaa', textAlign: 'left' }}>Your Review</h3>
+                    {savedReview ? (
+                      <div className="saved-review-box">
+                        "{savedReview}"
+                        <button onClick={() => setSavedReview(null)} style={{ display: 'block', background: 'none', border: 'none', color: '#888', marginTop: '10px', cursor: 'pointer', fontSize: '12px', padding: 0, textDecoration: 'underline' }}>Edit Review</button>
+                      </div>
+                    ) : (
+                      <>
+                        <textarea className="review-textarea" placeholder="Write your thoughts..." value={myReviewText} onChange={(e) => setMyReviewText(e.target.value)} />
+                        <button className="save-review-btn" onClick={handleSaveReview}>Save Review</button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ flex: 1, minWidth: '300px' }}>
+                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{item.title}</h1>
+                <p style={{ color: '#aaa', fontSize: '18px', marginBottom: '10px' }}>{item.year} • {item.type.toUpperCase()}</p>
+                {awardText && <p style={{ color: '#FFD700', fontSize: '16px', fontWeight: 'bold', marginBottom: '20px' }}>{awardText}</p>}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'inline-block', padding: '10px 20px', border: `2px solid ${r.col}`, background: r.bg, borderRadius: '12px' }}>
+                    <div style={{ fontSize: '30px', fontWeight: '900', color: r.col, textAlign: 'center', lineHeight: '1' }}>{item.rating}</div>
+                    <div style={{ fontSize: '10px', letterSpacing: '2px', color: r.col, fontWeight: '700', marginTop: '5px', textAlign: 'center' }}>{r.cat}</div>
+                  </div>
+                  
+                  <button onClick={() => toggleWatchlist(item)} className="action-btn watchlist-btn">{inWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
+                  <button onClick={() => handleShare(item)} className="action-btn share-btn">📤 Share</button>
                 </div>
                 
-                {savedReview ? (
-                  <div className="saved-review-box">
-                    "{savedReview}"
-                    <button onClick={() => setSavedReview(null)} style={{ display: 'block', background: 'none', border: 'none', color: '#888', marginTop: '10px', cursor: 'pointer', fontSize: '12px', padding: 0, textDecoration: 'underline' }}>Edit Review</button>
+                <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px'}}>Synopsis</h3>
+                <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc', marginBottom: '30px' }}>{item.synopsis}</p>
+
+                <WatchProvidersUI />
+
+                {director && (
+                  <div style={{ marginBottom: '30px' }}>
+                    <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>{item.type === 'movie' ? 'Directed By' : 'Created By'}</h3>
+                    <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer' }} className="cast-card">
+                      <img src={director.profile_path ? PROFILE_URL + director.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div style={{textAlign: 'left'}}>
+                        <h4 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>{director.name}</h4>
+                        <p style={{ margin: 0, color: '#aaa', fontSize: '14px' }}>{item.type === 'movie' ? 'Director' : 'Creator'}</p>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <>
-                    <textarea className="review-textarea" placeholder="Write your thoughts..." value={myReviewText} onChange={(e) => setMyReviewText(e.target.value)} />
-                    <button className="save-review-btn" onClick={handleSaveReview}>Save Review</button>
-                  </>
                 )}
               </div>
-
-              {/* SEASONS & EPISODES (Netflix Style) */}
-              {apiType === 'tv' && details && details.seasons && details.seasons.filter(s => s.season_number > 0).length > 0 && (
-                <div style={{ marginTop: '30px', marginBottom: '40px' }}>
-                  
-                  {/* Netflix style Season selector */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-                      <h2 style={{fontSize: '20px', color: '#fff', margin: 0}}>Episodes</h2>
-                      <select 
-                        value={activeSeason} 
-                        onChange={(e) => setActiveSeason(parseInt(e.target.value))} 
-                        className="season-select"
-                      >
-                        {details.seasons.filter(s => s.season_number > 0).map(s => (
-                          <option key={s.season_number} value={s.season_number}>Season {s.season_number}</option>
-                        ))}
-                      </select>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    {episodes.length === 0 ? <p style={{color: '#888'}}>Loading episodes...</p> : episodes.map(ep => {
-                      const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
-                      const epVotes = ep.vote_count || 0;
-                      const epRData = getRatingData(epRating, epVotes);
-                      return (
-                        <div key={ep.id} style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', borderBottom: '1px solid #222', paddingBottom: '20px' }}>
-                          <div style={{ position: 'relative', width: '130px', flexShrink: 0 }}>
-                              <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} style={{ width: '100%', height: '75px', objectFit: 'cover', borderRadius: '4px' }} />
-                              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
-                                  <span style={{ background: 'rgba(0,0,0,0.6)', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: 'white' }}>▶</span>
-                              </div>
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <strong style={{ fontSize: '15px', color: '#fff' }}>{ep.episode_number}. {ep.name}</strong>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                   {ep.runtime && <span style={{ color: '#888', fontSize: '12px' }}>{ep.runtime}m</span>}
-                                   <span style={{ background: epRData.bg, color: epRData.col, padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', border: `1px solid ${epRData.col}` }}>{epRating}</span>
-                                </div>
-                            </div>
-                            <p style={{ fontSize: '13px', color: '#aaa', margin: '8px 0 0 0', lineHeight: '1.5' }}>{(ep.overview || "No description available.").substring(0, 150)}{ep.overview?.length > 150 ? '...' : ''}</p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* CAST ROW */}
-              {cast.length > 0 && (
-                <div id="cast-section" style={{ marginTop: '30px' }}>
-                  <h2 style={{ fontSize: '20px', color: '#fff', marginBottom: '15px' }}>Top Cast</h2>
-                  <div className="cast-row">
-                    {cast.map(actor => (
-                      <div key={actor.id} className="cast-card" onClick={() => nav('/person', actor.id)}>
-                        <img src={actor.profile_path ? PROFILE_URL + actor.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} alt={actor.name} />
-                        <h4>{actor.name}</h4>
-                        <p>{actor.character}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {similar.length > 0 && (
-                <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid #222' }}>
-                  <MediaRow title="More Like This" items={similar} />
-                </div>
-              )}
             </div>
+
+            {apiType === 'tv' && details && details.seasons && details.seasons.filter(s => s.season_number > 0).length > 0 && (
+              <div style={{ marginTop: '50px', padding: '30px', background: '#0a0a0a', borderRadius: '16px', border: '1px solid #222' }}>
+                <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: '0 0 20px 0'}}>Seasons & Episodes</h2>
+                
+                {/* SEASON BUTTONS FIXED IN OLD UI */}
+                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', borderBottom: '1px solid #222', marginBottom: '20px' }}>
+                  {details.seasons.filter(s => s.season_number > 0).map(s => (
+                    <button key={s.season_number} onClick={() => setActiveSeason(s.season_number)} className={`season-btn ${activeSeason === s.season_number ? 'active' : ''}`}>Season {s.season_number}</button>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {episodes.length === 0 ? <p style={{color: '#888'}}>Loading episodes...</p> : episodes.map(ep => {
+                    const epRating = ep.vote_average ? ep.vote_average.toFixed(1) : '0.0';
+                    const epVotes = ep.vote_count || 0;
+                    const epRData = getRatingData(epRating, epVotes);
+                    return (
+                      <div key={ep.id} className="episode-card">
+                        <img src={ep.still_path ? IMG_URL + ep.still_path : item.image} />
+                        <div style={{ flex: 1, paddingRight: '15px' }}>
+                          <strong style={{ fontSize: '18px', color: '#fff' }}>{ep.episode_number}. {ep.name}</strong>
+                          <p style={{ fontSize: '14px', color: '#aaa', margin: '8px 0', lineHeight: '1.5' }}>{(ep.overview || "No description available.").substring(0, 180)}...</p>
+                        </div>
+                        <div style={{ padding: '10px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '140px' }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '22px' }}>{epRating}</div>
+                          <div style={{ fontSize: '11px', letterSpacing: '1px', marginTop: '4px' }}>{epRData.cat}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {cast.length > 0 && (
+              <div style={{ marginTop: '40px' }}>
+                <h3 style={{fontSize: '24px', borderBottom: '1px solid #333', paddingBottom: '10px', color: '#FFD700'}}>Top Cast</h3>
+                <div className="cast-row">
+                  {cast.map(actor => (
+                    <div key={actor.id} className="cast-card" onClick={() => nav('/person', actor.id)}>
+                      <img src={actor.profile_path ? PROFILE_URL + actor.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} alt={actor.name} />
+                      <h4>{actor.name}</h4>
+                      <p>{actor.character}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {similar.length > 0 && (
+              <div style={{ marginTop: '50px', paddingTop: '20px', borderTop: '1px solid #222' }}>
+                <MediaRow title="You Might Also Like..." items={similar} />
+              </div>
+            )}
           </div>
         );
       };

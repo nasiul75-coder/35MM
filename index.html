@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <!-- NEW: MAXIMUM-SCALE & USER-SCALABLE NO FIXED THE SCREEN WOBBLE ON PHONES -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <title>35 MM - Premium Cinema Ratings & Reviews</title>
@@ -16,7 +15,6 @@
   
   <style>
     :root { --bg: #050505; --surface: #121212; --primary: #FFD700; --text: #ffffff; }
-    /* Prevent pull-to-refresh and horizontal scroll jank on mobile */
     body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; overscroll-behavior-y: none; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
@@ -48,12 +46,12 @@
     .media-row { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5%; scroll-snap-type: x mandatory; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px 5%; }
     .media-card { flex: 0 0 200px; scroll-snap-align: start; background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #222; position: relative; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s; }
-    /* Only apply hover scale on devices that support hover (fixes mobile tap glitch) */
     @media (hover: hover) {
       .media-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.8); border-color: #444; z-index: 10; }
     }
     .media-card img { width: 100%; height: 300px; object-fit: cover; }
 
+    /* CAROUSEL */
     .carousel-container { position: relative; width: 100%; height: 80vh; overflow: hidden; background: #000; }
     .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
     .carousel-slide.active { opacity: 1; z-index: 1; }
@@ -113,7 +111,7 @@
     @media (hover: hover) { .save-review-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,215,0,0.4); } }
     .saved-review-box { background: #111; border-left: 4px solid #FFD700; padding: 15px; margin-top: 15px; border-radius: 4px 8px 8px 4px; color: #ccc; font-style: italic; line-height: 1.6; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
-    /* DETAIL PAGE BACKGROUND TRAILER - Mobile fix applied */
+    /* DETAIL PAGE BACKGROUND TRAILER */
     .detail-hero-bg { position: fixed; top: 0; left: 0; width: 100%; height: 75vh; z-index: -1; background: #000; overflow: hidden; pointer-events: none; }
     .detail-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(to bottom, rgba(5,5,5,0.6) 0%, rgba(5,5,5,0.9) 60%, #050505 100%); z-index: -1; pointer-events: none; }
 
@@ -127,10 +125,8 @@
       .episode-card img { width: 100% !important; height: auto !important; }
       .carousel-btn { display: none; } 
       .splash-logo { font-size: 50px; }
-      
-      /* Mobile performance fixes */
       .rating-badge, .genre-btn, .cast-card img { backdrop-filter: none; box-shadow: none; }
-      .detail-hero-bg { position: absolute; } /* Prevents fixed background jank on mobile scroll */
+      .detail-hero-bg { position: absolute; } 
       .detail-gradient { position: absolute; height: 150vh; }
     }
   </style>
@@ -348,12 +344,13 @@
               return (
                 <div key={item.id} className={`carousel-slide ${isCurrent ? 'active' : ''}`}>
                   
+                  {/* FULL HD FORCE TAG ADDED TO YOUTUBE SRC */}
                   <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})` }}></div>
                   
                   {isCurrent && videoKey && (
                     <iframe 
                       className="video-background" 
-                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1`} 
+                      src={`https://www.youtube.com/embed/${videoKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${videoKey}&modestbranding=1&playsinline=1&vq=hd1080`} 
                       allow="autoplay; encrypted-media">
                     </iframe>
                   )}
@@ -403,7 +400,7 @@
               const r = isPerson ? {bg: '#222', col: '#FFD700'} : getRatingData(item.rating, item.votes);
               return (
                 <div key={item.id} className="media-card" onClick={() => isPerson ? nav('/person', item.id) : nav('/detail', item)}>
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     {isPerson ? <><StarIcon/> PROFILE</> : item.rating}
                   </div>
                   <img src={item.image} alt={item.title} />
@@ -534,13 +531,13 @@
         return (
           <div style={{ padding: '0 0 40px 0', width: '100%', minHeight: '80vh' }}>
             
-            {/* CINEMATIC BACKGROUND VIDEO HEADER */}
             <div className="detail-hero-bg">
               <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})`, opacity: trailer ? 0 : 0.4, transition: 'opacity 2s ease 1s' }}></div>
+              {/* FULL HD FORCE TAG ADDED TO YOUTUBE SRC */}
               {trailer && (
                 <iframe 
                   className="video-background" 
-                  src={`https://www.youtube.com/embed/${trailer}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailer}&modestbranding=1&playsinline=1`} 
+                  src={`https://www.youtube.com/embed/${trailer}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailer}&modestbranding=1&playsinline=1&vq=hd1080`} 
                   allow="autoplay; encrypted-media">
                 </iframe>
               )}
@@ -552,7 +549,6 @@
               
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
                 
-                {/* POSTER & REVIEW SIDEBAR */}
                 <div style={{ width: '100%', maxWidth: '350px' }}>
                   <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.8)', marginBottom: '20px', border: '1px solid #333' }} />
                   
@@ -582,7 +578,6 @@
                   </div>
                 </div>
 
-                {/* MAIN DETAILS AREA */}
                 <div style={{ flex: 1, minWidth: '300px' }}>
                   <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '900', letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }}>{item.title}</h1>
                   
@@ -625,7 +620,6 @@
                 </div>
               </div>
 
-              {/* SEASONS & EPISODES */}
               {apiType === 'tv' && details && details.seasons && details.seasons.filter(s => s.season_number > 0).length > 0 && (
                 <div style={{ marginTop: '50px', padding: '30px', background: 'rgba(10,10,10,0.9)', borderRadius: '16px', border: '1px solid #222', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)' }}>
                   <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: '0 0 20px 0'}}>Seasons & Episodes</h2>

@@ -23,19 +23,12 @@
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
 
-    /* NEW CINEMATIC FILM SPLASH SCREEN */
     .splash-screen { position: fixed; inset: 0; background: #020202; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOutSplash 0.8s ease 3s forwards; overflow: hidden; }
-    
-    /* Film Reel Lines / Vignette */
     .splash-screen::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0) 100%); background-size: 100% 4px; pointer-events: none; z-index: 2; animation: scrollLines 0.5s linear infinite; }
     .splash-screen::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,1) 100%); z-index: 3; pointer-events: none; }
-
     .splash-content { position: relative; z-index: 4; display: flex; flex-direction: column; align-items: center; }
-
-    /* Classic Movie Title Font with Focus Blur & Flicker */
     .splash-logo { font-size: 85px; font-weight: normal; font-family: 'Georgia', 'Times New Roman', serif; letter-spacing: 20px; color: #e0e0e0; text-shadow: 0 0 15px rgba(255,255,255,0.2); animation: cinematicFocus 3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, projectorFlicker 0.15s infinite; text-transform: uppercase; margin-left: 20px; }
-    .splash-logo span { color: #e0e0e0; font-weight: normal; } /* NO YELLOW COLOR HERE */
-    
+    .splash-logo span { color: #e0e0e0; font-weight: normal; } 
     .splash-subtitle { color: #888; font-size: 14px; letter-spacing: 10px; margin-top: 25px; opacity: 0; animation: fadeInText 1.5s ease 1s forwards; font-family: 'Inter', sans-serif; text-transform: uppercase; }
 
     @keyframes cinematicFocus { 0% { transform: scale(1.5); filter: blur(15px); opacity: 0; } 100% { transform: scale(1); filter: blur(0); opacity: 1; } }
@@ -44,10 +37,8 @@
     @keyframes fadeOutSplash { to { opacity: 0; visibility: hidden; } }
     @keyframes scrollLines { 0% { background-position: 0 0; } 100% { background-position: 0 10px; } }
 
-    /* REST OF THE WEBSITE CSS (UNCHANGED) */
     .nav-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; font-weight: 600; transition: 0.2s; }
     .nav-btn:hover { color: #fff; }
-
     .search-bar { padding: 10px 15px; border-radius: 20px; border: 1px solid #333; background: rgba(0,0,0,0.5); color: white; width: 200px; outline: none; transition: 0.3s; }
     .search-bar:focus { border-color: var(--primary); width: 260px; background: rgba(0,0,0,0.8); }
 
@@ -181,12 +172,12 @@
 
     function App() {
       const [showSplash, setShowSplash] = useState(true);
-
       const [route, setRoute] = useState('/');
       const [selectedItem, setSelectedItem] = useState(null);
       const [searchQuery, setSearchQuery] = useState('');
       const [searchResults, setSearchResults] = useState([]);
       
+      const [heroRandomMovies, setHeroRandomMovies] = useState([]); // NEW STATE FOR RANDOM CAROUSEL
       const [trendingMovies, setTrendingMovies] = useState([]);
       const [trendingSeries, setTrendingSeries] = useState([]);
       const [topRated, setTopRated] = useState([]);
@@ -202,21 +193,41 @@
       const [showLogin, setShowLogin] = useState(false);
 
       useEffect(() => {
-        const splashTimer = setTimeout(() => {
-          setShowSplash(false);
-        }, 3500); // 3.5 sec gives perfect time for the animation
+        const splashTimer = setTimeout(() => { setShowSplash(false); }, 3500); 
 
         const savedList = localStorage.getItem('35mm_watchlist');
         if (savedList) setWatchlist(JSON.parse(savedList));
         const savedUser = localStorage.getItem('35mm_user');
         if (savedUser) setUser(savedUser);
 
+        // Fetch everything independently
         fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}`).then(r => r.json()).then(data => setTrendingMovies(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/trending/tv/day?api_key=${API_KEY}`).then(r => r.json()).then(data => setTrendingSeries(data.results.map(s => formatData(s, 'series'))));
         fetch(`${BASE_URL}/movie/top_rated?api_key=${API_KEY}`).then(r => r.json()).then(data => setTopRated(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`).then(r => r.json()).then(data => setNowPlaying(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`).then(r => r.json()).then(data => setUpcoming(data.results.map(m => formatData(m, 'movie'))));
         fetch(`${BASE_URL}/tv/top_rated?api_key=${API_KEY}`).then(r => r.json()).then(data => setTopSeries(data.results.map(s => formatData(s, 'series'))));
+
+        // NEW LOGIC: Mix and Randomize Movies for the Hero Slider
+        Promise.all([
+          fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`).then(r => r.json()),
+          fetch(`${BASE_URL}/trending/tv/week?api_key=${API_KEY}`).then(r => r.json()),
+          fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`).then(r => r.json())
+        ]).then(([trendM, trendS, nowP]) => {
+          let combined = [
+            ...trendM.results.map(m => formatData(m, 'movie')),
+            ...trendS.results.map(s => formatData(s, 'series')),
+            ...nowP.results.map(m => formatData(m, 'movie'))
+          ];
+          
+          // Remove duplicates
+          let unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+          // Keep only items with backdrops and shuffle them
+          let valid = unique.filter(i => i.backdrop);
+          let shuffled = valid.sort(() => Math.random() - 0.5).slice(0, 15);
+          
+          setHeroRandomMovies(shuffled);
+        });
 
         return () => clearTimeout(splashTimer);
       }, []);
@@ -275,11 +286,12 @@
         );
       };
 
+      // SAFE AUTOPLAY CAROUSEL (Now uses random items)
       const HeroCarousel = ({ items }) => {
         const [currentIndex, setCurrentIndex] = useState(0);
         const [videoKey, setVideoKey] = useState(null);
         const [isMuted, setIsMuted] = useState(true);
-        const topItems = items ? items.slice(0, 10) : [];
+        const topItems = items ? items.slice(0, 15) : [];
 
         useEffect(() => {
           if (topItems.length === 0) return;
@@ -682,7 +694,9 @@
         if (searchQuery.length > 2) return <GridView title={`Search Results for "${searchQuery}"`} items={searchResults} emptyMsg="No results found." />;
         return (
           <>
-            <HeroCarousel items={trendingMovies} />
+            {/* THIS IS THE FIXED SLIDER USING heroRandomMovies */}
+            <HeroCarousel items={heroRandomMovies} />
+            
             <div className="genre-row">
               {GENRES.map(g => (
                 <button key={g.id} className="genre-btn" onClick={() => handleGenreClick(g)}>{g.name}</button>

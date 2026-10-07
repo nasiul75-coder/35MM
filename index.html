@@ -14,124 +14,121 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <style>
-    :root { --bg: #050505; --surface: #121212; --primary: #FFD700; --text: #ffffff; }
-    body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; overscroll-behavior-y: none; }
+    :root { --bg: #050505; --surface: #181818; --primary: #FFD700; --text: #ffffff; }
+    
+    /* VIBRANT BACKGROUND UPGRADE */
+    body { margin: 0; background: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%); background-attachment: fixed; color: var(--text); font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; overscroll-behavior-y: none; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #555; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
 
     /* SPLASH SCREEN */
     .splash-screen { position: fixed; inset: 0; background: #020202; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; animation: fadeOutSplash 0.8s ease 3s forwards; overflow: hidden; }
     .splash-screen::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0) 100%); background-size: 100% 4px; pointer-events: none; z-index: 2; animation: scrollLines 0.5s linear infinite; }
     .splash-screen::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 40%, rgba(0,0,0,1) 100%); z-index: 3; pointer-events: none; }
     .splash-content { position: relative; z-index: 4; display: flex; flex-direction: column; align-items: center; }
-    .splash-logo { font-size: 85px; font-weight: normal; font-family: 'Georgia', 'Times New Roman', serif; letter-spacing: 20px; color: #e0e0e0; text-shadow: 0 0 15px rgba(255,255,255,0.2); animation: cinematicFocus 3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, projectorFlicker 0.15s infinite; text-transform: uppercase; margin-left: 20px; }
-    .splash-logo span { color: #e0e0e0; font-weight: normal; } 
-    .splash-subtitle { color: #888; font-size: 14px; letter-spacing: 10px; margin-top: 25px; opacity: 0; animation: fadeInText 1.5s ease 1s forwards; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+    .splash-logo { font-size: 85px; font-weight: normal; font-family: 'Georgia', 'Times New Roman', serif; letter-spacing: 20px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.3); animation: cinematicFocus 3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards, projectorFlicker 0.15s infinite; text-transform: uppercase; margin-left: 20px; }
+    .splash-logo span { color: #fff; font-weight: normal; } 
+    .splash-subtitle { color: #aaa; font-size: 14px; letter-spacing: 10px; margin-top: 25px; opacity: 0; animation: fadeInText 1.5s ease 1s forwards; font-family: 'Inter', sans-serif; text-transform: uppercase; }
 
     @keyframes cinematicFocus { 0% { transform: scale(1.5); filter: blur(15px); opacity: 0; } 100% { transform: scale(1); filter: blur(0); opacity: 1; } }
-    @keyframes projectorFlicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; text-shadow: 0 0 25px rgba(255,255,255,0.5); } }
+    @keyframes projectorFlicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; text-shadow: 0 0 25px rgba(255,255,255,0.6); } }
     @keyframes fadeInText { to { opacity: 1; } }
     @keyframes fadeOutSplash { to { opacity: 0; visibility: hidden; } }
     @keyframes scrollLines { 0% { background-position: 0 0; } 100% { background-position: 0 10px; } }
 
     /* UI POLISH */
     .nav-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 15px; font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
-    .nav-btn:hover { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
-    .search-bar { padding: 10px 15px; border-radius: 20px; border: 1px solid #333; background: rgba(0,0,0,0.5); color: white; width: 200px; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif; backdrop-filter: blur(5px); }
-    .search-bar:focus { border-color: var(--primary); width: 260px; background: rgba(0,0,0,0.8); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+    .nav-btn:hover { color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.6); }
+    .search-bar { padding: 10px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); color: white; width: 200px; outline: none; transition: 0.3s; font-family: 'Inter', sans-serif; backdrop-filter: blur(10px); }
+    .search-bar:focus { border-color: var(--primary); width: 260px; background: rgba(0,0,0,0.8); box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
 
-    .media-row { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5%; scroll-snap-type: x mandatory; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
+    .media-row { display: flex; gap: 15px; overflow-x: auto; padding: 10px 5%; scroll-snap-type: x mandatory; padding-bottom: 25px; -webkit-overflow-scrolling: touch; }
     .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px 5%; }
-    .media-card { flex: 0 0 200px; scroll-snap-align: start; background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid #222; position: relative; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s; }
+    
+    /* VIBRANT CARDS */
+    .media-card { flex: 0 0 200px; scroll-snap-align: start; background: linear-gradient(180deg, rgba(30,30,30,1) 0%, rgba(15,15,15,1) 100%); border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); position: relative; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     @media (hover: hover) {
-      .media-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 15px 30px rgba(0,0,0,0.9); border-color: #555; z-index: 10; }
+      .media-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.9), 0 0 20px rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); z-index: 10; }
     }
     .media-card img { width: 100%; height: 300px; object-fit: cover; }
 
     /* CAROUSEL */
-    .carousel-container { position: relative; width: 100%; height: 80vh; overflow: hidden; background: #000; }
+    .carousel-container { position: relative; width: 100%; height: 80vh; overflow: hidden; background: #000; box-shadow: inset 0 -50px 100px -20px #050505; }
     .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; display: flex; align-items: flex-end; z-index: 0; }
     .carousel-slide.active { opacity: 1; z-index: 1; }
-    .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.4) 50%, transparent 100%); z-index: 2; pointer-events: none; }
+    .hero-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #050505 5%, rgba(5,5,5,0.2) 50%, transparent 100%); z-index: 2; pointer-events: none; }
     .hero-content { position: relative; z-index: 3; padding: 50px 5%; max-width: 800px; }
     
     .fallback-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; transition: opacity 2s ease-in-out; }
     
-    /* HD QUALITY HACK FOR MOBILE/IPAD */
-    .video-background { 
-      position: absolute; 
-      top: 50%; left: 50%; 
-      width: 200vw; height: 112.5vw; min-height: 200vh; min-width: 355.54vh; 
-      transform: translate(-50%, -50%) scale(0.5); 
-      z-index: 1; pointer-events: none; border: none; opacity: 0; 
-      animation: slowVideoFade 2s ease-in-out 1.5s forwards; 
-    }
+    .video-background { position: absolute; top: 50%; left: 50%; width: 200vw; height: 112.5vw; min-height: 200vh; min-width: 355.54vh; transform: translate(-50%, -50%) scale(0.5); z-index: 1; pointer-events: none; border: none; opacity: 0; animation: slowVideoFade 2s ease-in-out 1.5s forwards; }
     @keyframes slowVideoFade { to { opacity: 1; } }
 
-    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 24px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
-    @media (hover: hover) { .carousel-btn:hover { background: var(--primary); color: black; transform: translateY(-50%) scale(1.1); } }
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.4); color: white; border: none; font-size: 24px; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; z-index: 10; backdrop-filter: blur(5px); transition: 0.3s; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.2); }
+    @media (hover: hover) { .carousel-btn:hover { background: var(--primary); color: black; transform: translateY(-50%) scale(1.1); box-shadow: 0 0 15px rgba(255,215,0,0.5); } }
     .carousel-btn.left { left: 30px; }
     .carousel-btn.right { right: 30px; }
     .carousel-indicators { position: absolute; bottom: 30px; right: 5%; display: flex; gap: 8px; z-index: 10; }
     .indicator { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
-    .indicator.active { background: var(--primary); transform: scale(1.4); box-shadow: 0 0 8px var(--primary); }
+    .indicator.active { background: var(--primary); transform: scale(1.4); box-shadow: 0 0 10px var(--primary); }
 
-    .episode-card { display: flex; gap: 15px; background: #0f0f0f; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #1f1f1f; align-items: center; transition: 0.3s; }
-    @media (hover: hover) { .episode-card:hover { border-color: #444; background: #1a1a1a; box-shadow: 0 5px 15px rgba(0,0,0,0.5); } }
+    .episode-card { display: flex; gap: 15px; background: rgba(20,20,20,0.8); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); align-items: center; transition: 0.3s; backdrop-filter: blur(10px); }
+    @media (hover: hover) { .episode-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(30,30,30,0.9); box-shadow: 0 10px 25px rgba(0,0,0,0.6); transform: translateX(5px); } }
     .episode-card img { width: 160px; height: 90px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
 
-    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 25px; color: #000; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.2s; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
-    .trailer-btn { background: #fff; box-shadow: 0 4px 15px rgba(255,255,255,0.2); }
-    .watchlist-btn { background: #222; color: #fff; border: 1px solid #444; }
-    .share-btn { background: #25D366; color: #fff; }
+    /* ENHANCED BUTTONS */
+    .action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 25px; text-decoration: none; font-weight: 900; border-radius: 8px; font-size: 15px; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .trailer-btn { background: linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%); color: #000; }
+    .watchlist-btn { background: rgba(255,255,255,0.1); color: #fff; backdrop-filter: blur(10px); }
+    .share-btn { background: linear-gradient(135deg, #25D366 0%, #1da851 100%); color: #fff; border: none; }
     
     @media (hover: hover) {
-      .trailer-btn:hover { background: #FFD700; transform: scale(1.05); box-shadow: 0 4px 20px rgba(255,215,0,0.4); }
-      .watchlist-btn:hover { background: #333; transform: scale(1.05); border-color: #666; }
-      .share-btn:hover { transform: scale(1.05); }
+      .trailer-btn:hover { background: #FFD700; transform: scale(1.05); box-shadow: 0 8px 25px rgba(255,215,0,0.5); border-color: #FFD700; }
+      .watchlist-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); border-color: #fff; }
+      .share-btn:hover { transform: scale(1.05); box-shadow: 0 8px 25px rgba(37,211,102,0.4); }
     }
     
-    .age-rating { border: 1px solid #666; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: #ddd; font-weight: bold; background: rgba(0,0,0,0.5); text-transform: uppercase; }
+    .rating-badge { display: inline-block; padding: 6px 15px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+    .age-rating { border: 1px solid rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #fff; font-weight: bold; background: rgba(0,0,0,0.6); text-transform: uppercase; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
 
-    .cast-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; -webkit-overflow-scrolling: touch; }
+    .cast-row { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px; -webkit-overflow-scrolling: touch; }
     .cast-card { flex: 0 0 120px; text-align: center; cursor: pointer; transition: 0.3s; }
-    @media (hover: hover) { .cast-card:hover { transform: translateY(-5px); } }
-    .cast-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid #333; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    @media (hover: hover) { .cast-card:hover { transform: translateY(-8px); } }
+    .cast-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); margin-bottom: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); transition: 0.3s; }
+    @media (hover: hover) { .cast-card:hover img { border-color: #FFD700; box-shadow: 0 8px 25px rgba(255,215,0,0.3); } }
     .cast-card h4 { margin: 0; font-size: 14px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .cast-card p { margin: 5px 0 0 0; font-size: 12px; color: #aaa; }
 
     .star { font-size: 35px; cursor: pointer; transition: 0.2s; color: #444; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-    @media (hover: hover) { .star:hover { transform: scale(1.2); } }
+    @media (hover: hover) { .star:hover { transform: scale(1.2); filter: drop-shadow(0 0 8px #FFD700); } }
 
     .genre-row { display: flex; gap: 15px; overflow-x: auto; padding: 20px 5%; margin-top: -30px; position: relative; z-index: 10; -webkit-overflow-scrolling: touch; }
-    .genre-btn { padding: 10px 25px; background: rgba(20,20,20,0.8); border: 1px solid #333; color: white; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-weight: bold; backdrop-filter: blur(5px); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    @media (hover: hover) { .genre-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,215,0,0.3); } }
+    .genre-btn { padding: 10px 25px; background: rgba(20,20,20,0.8); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 30px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-weight: bold; backdrop-filter: blur(10px); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    @media (hover: hover) { .genre-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,215,0,0.4); } }
 
-    .season-select { background: #1a1a1a; color: #fff; border: 1px solid #444; padding: 10px 15px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; outline: none; transition: 0.3s; }
-    .season-select:focus, .season-select:hover { border-color: #FFD700; background: #222; }
+    .season-select { background: rgba(25,25,25,0.9); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; outline: none; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .season-select:focus, .season-select:hover { border-color: #FFD700; background: rgba(40,40,40,1); }
 
-    .review-textarea { width: 100%; background: #0a0a0a; border: 1px solid #333; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
-    .review-textarea:focus { border-color: #FFD700; background: #111; box-shadow: 0 0 10px rgba(255,215,0,0.1); }
-    .save-review-btn { background: #FFD700; color: #000; font-weight: bold; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; box-shadow: 0 4px 15px rgba(255,215,0,0.2); }
-    @media (hover: hover) { .save-review-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,215,0,0.4); } }
-    .saved-review-box { background: #111; border-left: 4px solid #FFD700; padding: 15px; margin-top: 15px; border-radius: 4px 8px 8px 4px; color: #ccc; font-style: italic; line-height: 1.6; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .review-textarea { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-family: 'Inter', sans-serif; resize: vertical; min-height: 80px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+    .review-textarea:focus { border-color: #FFD700; background: rgba(15,15,15,0.9); box-shadow: 0 0 15px rgba(255,215,0,0.15); }
+    .save-review-btn { background: linear-gradient(135deg, #FFD700 0%, #e6c200 100%); color: #000; font-weight: bold; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; transition: 0.2s; box-shadow: 0 5px 15px rgba(255,215,0,0.2); }
+    @media (hover: hover) { .save-review-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.5); } }
+    .saved-review-box { background: rgba(15,15,15,0.8); border-left: 4px solid #FFD700; padding: 15px; margin-top: 15px; border-radius: 4px 8px 8px 4px; color: #eee; font-style: italic; line-height: 1.6; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
 
     /* DETAIL PAGE BACKGROUND TRAILER */
-    .detail-hero-bg { position: fixed; top: 0; left: 0; width: 100%; height: 75vh; z-index: -1; background: #000; overflow: hidden; pointer-events: none; }
-    .detail-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(to bottom, rgba(5,5,5,0.6) 0%, rgba(5,5,5,0.9) 60%, #050505 100%); z-index: -1; pointer-events: none; }
+    .detail-hero-bg { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; z-index: -1; background: #000; overflow: hidden; pointer-events: none; }
+    /* Brighter gradient so HD video is more visible and vibrant */
+    .detail-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(5,5,5,0.8) 50%, #050505 100%); z-index: -1; pointer-events: none; }
 
-    /* PREMIUM ANIMATED RATING GAUGE CSS */
-    .rating-gauge-container { display: flex; alignItems: center; gap: 20px; background: rgba(15, 15, 15, 0.7); padding: 10px 25px 10px 10px; border-radius: 50px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; cursor: default; }
-    .rating-gauge-container:hover { background: rgba(20, 20, 20, 0.9); }
-    .circular-chart { display: block; margin: 0 auto; max-width: 65px; max-height: 65px; }
-    .circle-bg { fill: none; stroke: #222; stroke-width: 3.5; }
-    .circle { fill: none; stroke-width: 3.5; stroke-linecap: round; animation: progress 1.5s ease-out forwards; }
+    /* GUARANTEED RATING GAUGE CSS */
+    .rating-gauge-container { display: flex; alignItems: center; gap: 20px; background: rgba(20, 20, 20, 0.8); padding: 10px 25px 10px 10px; border-radius: 50px; backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.15); transition: 0.3s; cursor: default; }
+    .rating-gauge-container:hover { background: rgba(30, 30, 30, 0.95); border-color: rgba(255,255,255,0.3); }
+    
     @keyframes progress { 0% { stroke-dasharray: 0 100; } }
-    .percentage { fill: #fff; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; text-anchor: middle; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .pulse-glow { animation: textPulse 2s infinite alternate; }
     @keyframes textPulse { 0% { text-shadow: 0 0 10px currentColor; opacity: 0.8; } 100% { text-shadow: 0 0 25px currentColor, 0 0 5px currentColor; opacity: 1; transform: scale(1.02); } }
 
@@ -146,7 +143,7 @@
       .splash-logo { font-size: 50px; }
       .detail-hero-bg { position: absolute; } 
       .detail-gradient { position: absolute; height: 150vh; }
-      .rating-gauge-container { border-radius: 12px; padding: 15px; }
+      .rating-gauge-container { border-radius: 16px; padding: 15px; }
     }
   </style>
 </head>
@@ -215,23 +212,32 @@
       };
     };
 
+    // 100% FIXED RATING BADGE (GUARANTEED TO SHOW NUMBER EVERYWHERE)
     const AnimatedRatingBadge = ({ rating, category, color }) => {
       const percentage = Math.round((parseFloat(rating) / 10) * 100) || 0;
       const strokeVal = `${percentage}, 100`;
       const isMasterpiece = parseFloat(rating) >= 9.5;
       
       return (
-        <div className="rating-gauge-container" style={{ boxShadow: `0 0 30px ${color}25` }}>
-          <svg viewBox="0 0 36 36" className="circular-chart">
-            <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path className="circle" stroke={color} strokeDasharray={strokeVal} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <text x="18" y="21.5" className="percentage">{rating}</text>
-          </svg>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span className={isMasterpiece ? "pulse-glow" : ""} style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '2px', color: color, textTransform: 'uppercase' }}>
+        <div className="rating-gauge-container" style={{ boxShadow: `0 8px 30px ${color}30`, border: `1px solid ${color}50` }}>
+          
+          <div style={{ position: 'relative', width: '60px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {/* SVG Ring rotated to start from top */}
+            <svg viewBox="0 0 36 36" style={{ position: 'absolute', width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke={color} strokeWidth="3" strokeDasharray={strokeVal} strokeLinecap="round" style={{ animation: 'progress 1.5s ease-out forwards' }} />
+            </svg>
+            {/* Direct HTML Text Overlay (Fixes iPad/Mobile SVG text bug completely) */}
+            <span style={{ position: 'relative', zIndex: 2, fontSize: '18px', fontWeight: '900', color: '#fff', textShadow: '0 2px 5px rgba(0,0,0,0.8)' }}>
+              {rating}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '5px' }}>
+            <span className={isMasterpiece ? "pulse-glow" : ""} style={{ fontSize: '16px', fontWeight: '900', letterSpacing: '2px', color: color, textTransform: 'uppercase', textShadow: `0 0 10px ${color}80` }}>
               {category}
             </span>
-            <span style={{ fontSize: '11px', color: '#888', fontWeight: 'bold', letterSpacing: '1px', marginTop: '2px' }}>
+            <span style={{ fontSize: '11px', color: '#bbb', fontWeight: 'bold', letterSpacing: '1px', marginTop: '2px' }}>
               35MM CUSTOM TIER
             </span>
           </div>
@@ -386,7 +392,9 @@
               const isCurrent = idx === currentIndex;
               return (
                 <div key={item.id} className={`carousel-slide ${isCurrent ? 'active' : ''}`}>
+                  
                   <div className="fallback-bg" style={{ backgroundImage: `url(${item.backdrop || item.image})` }}></div>
+                  
                   {isCurrent && videoKey && (
                     <iframe 
                       className="video-background" 
@@ -394,23 +402,26 @@
                       allow="autoplay; encrypted-media">
                     </iframe>
                   )}
+
                   <div className="hero-gradient"></div>
+                  
                   {isCurrent && (
                     <div className="hero-content">
-                      <div className="rating-badge" style={{ border: `1px solid ${r.col}`, background: r.bg, marginBottom: '15px' }}>
+                      <div className="rating-badge" style={{ border: `1px solid ${r.col}`, background: r.bg, marginBottom: '15px', boxShadow: `0 5px 20px ${r.col}20` }}>
                         <span style={{ color: r.col, fontWeight: 'bold', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '5px' }}>
                           <StarIcon /> {item.rating} • {r.cat}
                         </span>
                       </div>
-                      <h1 style={{ fontSize: '48px', margin: '0 0 15px 0', fontWeight: '900', textShadow: '2px 2px 10px rgba(0,0,0,0.8)' }}>{item.title}</h1>
-                      <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#ddd', textShadow: '1px 1px 5px rgba(0,0,0,0.8)', maxWidth: '600px' }}>{item.synopsis.substring(0, 150)}...</p>
+                      <h1 style={{ fontSize: '48px', margin: '0 0 15px 0', fontWeight: '900', textShadow: '0 5px 15px rgba(0,0,0,1)' }}>{item.title}</h1>
+                      <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#eee', textShadow: '0 2px 8px rgba(0,0,0,0.9)', maxWidth: '600px' }}>{item.synopsis.substring(0, 150)}...</p>
                       <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
                         <button onClick={() => nav('/detail', item)} className="action-btn trailer-btn"><PlayIcon /> View Details</button>
                       </div>
                     </div>
                   )}
+
                   {isCurrent && videoKey && (
-                    <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} style={{ position: 'absolute', bottom: '100px', right: '5%', zIndex: 20, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.3s', backdropFilter: 'blur(5px)' }} title={isMuted ? "Unmute" : "Mute"}>
+                    <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} style={{ position: 'absolute', bottom: '100px', right: '5%', zIndex: 20, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: '0.3s', backdropFilter: 'blur(5px)', boxShadow: '0 5px 15px rgba(0,0,0,0.5)' }} title={isMuted ? "Unmute" : "Mute"}>
                       {isMuted ? <SoundOffIcon/> : <SoundOnIcon/>}
                     </button>
                   )}
@@ -437,13 +448,13 @@
               const r = isPerson ? {bg: '#222', col: '#FFD700'} : getRatingData(item.rating, item.votes);
               return (
                 <div key={item.id} className="media-card" onClick={() => isPerson ? nav('/person', item.id) : nav('/detail', item)}>
-                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}50`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
                     {isPerson ? <><StarIcon/> PROFILE</> : item.rating}
                   </div>
                   <img src={item.image} alt={item.title} />
                   <div style={{ padding: '15px' }}>
-                    <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3>
-                    <p style={{ margin: 0, color: '#888', fontSize: '12px' }}>{item.year} {isPerson ? '' : `• ${item.type.toUpperCase()}`}</p>
+                    <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>{item.title}</h3>
+                    <p style={{ margin: 0, color: '#aaa', fontSize: '12px' }}>{item.year} {isPerson ? '' : `• ${item.type.toUpperCase()}`}</p>
                   </div>
                 </div>
               );
@@ -457,7 +468,7 @@
         const [trailer, setTrailer] = useState(null);
         const [cast, setCast] = useState([]);
         const [director, setDirector] = useState(null);
-        const [writers, setWriters] = useState([]); // NEW WRITER STATE
+        const [writers, setWriters] = useState([]); 
         const [providers, setProviders] = useState(null);
         const [similar, setSimilar] = useState([]);
         const [myRating, setMyRating] = useState(0);
@@ -499,7 +510,6 @@
                 const dir = data.credits?.crew?.find(c => c.job === 'Director');
                 if(dir) setDirector(dir);
                 
-                // NEW: EXTRACT WRITERS
                 const foundWriters = data.credits?.crew?.filter(c => c.department === 'Writing' || c.job === 'Screenplay' || c.job === 'Writer' || c.job === 'Story');
                 if (foundWriters) {
                   let unique = [];
@@ -569,9 +579,9 @@
               <h3 style={{fontSize: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', color: '#FFD700', textShadow: '0 2px 5px rgba(0,0,0,0.8)'}}>Available to Watch On</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginTop: '15px' }}>
                 {uniqueProviders.map(p => (
-                  <div key={p.provider_id} title={p.provider_name} style={{ display: 'flex', alignItems: 'center', background: 'rgba(20,20,20,0.8)', padding: '8px 15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)' }}>
+                  <div key={p.provider_id} title={p.provider_name} style={{ display: 'flex', alignItems: 'center', background: 'rgba(20,20,20,0.8)', padding: '8px 15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)', boxShadow: '0 5px 15px rgba(0,0,0,0.3)' }}>
                     <img src={IMG_URL + p.logo_path} style={{ width: '35px', height: '35px', borderRadius: '8px', marginRight: '10px' }} />
-                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>{p.provider_name}</span>
+                    <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#fff' }}>{p.provider_name}</span>
                   </div>
                 ))}
               </div>
@@ -600,9 +610,9 @@
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
                 
                 <div style={{ width: '100%', maxWidth: '350px' }}>
-                  <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: `0 20px 50px ${r.col}30`, marginBottom: '20px', border: `1px solid ${r.col}40` }} />
+                  <img src={item.image} style={{ width: '100%', borderRadius: '16px', objectFit: 'cover', boxShadow: `0 20px 50px ${r.col}40`, marginBottom: '20px', border: `1px solid ${r.col}50` }} />
                   
-                  <div style={{ background: 'rgba(10, 10, 10, 0.75)', backdropFilter: 'blur(15px)', padding: '25px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', boxShadow: '0 15px 30px rgba(0,0,0,0.6)' }}>
+                  <div style={{ background: 'rgba(15, 15, 15, 0.85)', backdropFilter: 'blur(20px)', padding: '25px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', boxShadow: '0 15px 30px rgba(0,0,0,0.8)' }}>
                     <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', color: '#ccc', letterSpacing: '1px', textTransform: 'uppercase' }}>Rate this {item.type}</h3>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '4px' }}>
                       {[1,2,3,4,5,6,7,8,9,10].map(star => (
@@ -629,12 +639,12 @@
                 </div>
 
                 <div style={{ flex: 1, minWidth: '300px' }}>
-                  <h1 style={{ fontSize: '46px', margin: '0 0 10px 0', fontWeight: '900', letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}>{item.title}</h1>
+                  <h1 style={{ fontSize: '48px', margin: '0 0 10px 0', fontWeight: '900', letterSpacing: '-1px', textShadow: '0 5px 15px rgba(0,0,0,1)', color: '#fff' }}>{item.title}</h1>
                   
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '15px', textShadow: '0 2px 5px rgba(0,0,0,0.8)' }}>
-                    <span style={{ color: '#aaa', fontSize: '18px', fontWeight: 'bold' }}>{item.year}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', textShadow: '0 2px 5px rgba(0,0,0,0.8)' }}>
+                    <span style={{ color: '#eee', fontSize: '18px', fontWeight: 'bold' }}>{item.year}</span>
                     {ageRating && <span className="age-rating">{ageRating}</span>}
-                    <span style={{ color: '#aaa', fontSize: '16px' }}>• {item.type.toUpperCase()}</span>
+                    <span style={{ color: '#ccc', fontSize: '16px' }}>• {item.type.toUpperCase()}</span>
                   </div>
 
                   {awardText && <p style={{ color: '#FFD700', fontSize: '15px', fontWeight: 'bold', marginBottom: '25px', display: 'inline-block', background: 'rgba(255,215,0,0.1)', padding: '5px 12px', borderRadius: '4px', border: '1px solid rgba(255,215,0,0.3)', boxShadow: '0 4px 10px rgba(255,215,0,0.1)' }}>{awardText}</p>}
@@ -646,18 +656,17 @@
                     <button onClick={() => handleShare(item)} className="action-btn share-btn"><ShareIcon /> Share</button>
                   </div>
                   
-                  <h3 style={{fontSize: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', textShadow: '0 2px 5px rgba(0,0,0,0.8)'}}>Synopsis</h3>
-                  <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#ccc', marginBottom: '30px', textShadow: '0 2px 5px rgba(0,0,0,0.8)' }}>{item.synopsis}</p>
+                  <h3 style={{fontSize: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', textShadow: '0 2px 5px rgba(0,0,0,0.8)', color: '#fff'}}>Synopsis</h3>
+                  <p style={{ fontSize: '18px', lineHeight: '1.8', color: '#eee', marginBottom: '30px', textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>{item.synopsis}</p>
 
                   <WatchProvidersUI />
 
-                  {/* DIRECTOR & WRITERS ROW ALIGNED TOGETHER */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', marginBottom: '30px' }}>
                     
                     {director && (
                       <div>
                         <h3 style={{fontSize: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', color: '#FFD700', textShadow: '0 2px 5px rgba(0,0,0,0.8)'}}>{item.type === 'movie' ? 'Directed By' : 'Created By'}</h3>
-                        <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(15,15,15,0.8)', padding: '8px 20px 8px 8px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: '0.3s', backdropFilter: 'blur(10px)', boxShadow: '0 5px 15px rgba(0,0,0,0.3)' }} className="cast-card">
+                        <div onClick={() => nav('/person', director.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(20,20,20,0.8)', padding: '8px 20px 8px 8px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', transition: '0.3s', backdropFilter: 'blur(10px)', boxShadow: '0 5px 15px rgba(0,0,0,0.5)' }} className="cast-card">
                           <img src={director.profile_path ? PROFILE_URL + director.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover', margin: 0 }} />
                           <div style={{textAlign: 'left'}}>
                             <h4 style={{ margin: 0, fontSize: '15px', color: '#fff' }}>{director.name}</h4>
@@ -672,7 +681,7 @@
                         <h3 style={{fontSize: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', color: '#FFD700', textShadow: '0 2px 5px rgba(0,0,0,0.8)'}}>Written By</h3>
                         <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
                           {writers.map(w => (
-                            <div key={w.id} onClick={() => nav('/person', w.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(15,15,15,0.8)', padding: '8px 20px 8px 8px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: '0.3s', backdropFilter: 'blur(10px)', boxShadow: '0 5px 15px rgba(0,0,0,0.3)' }} className="cast-card">
+                            <div key={w.id} onClick={() => nav('/person', w.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(20,20,20,0.8)', padding: '8px 20px 8px 8px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', transition: '0.3s', backdropFilter: 'blur(10px)', boxShadow: '0 5px 15px rgba(0,0,0,0.5)' }} className="cast-card">
                               <img src={w.profile_path ? PROFILE_URL + w.profile_path : 'https://via.placeholder.com/100?text=No+Pic'} style={{ width: '45px', height: '45px', borderRadius: '50%', objectFit: 'cover', margin: 0 }} />
                               <div style={{textAlign: 'left'}}>
                                 <h4 style={{ margin: 0, fontSize: '15px', color: '#fff' }}>{w.name}</h4>
@@ -688,7 +697,7 @@
               </div>
 
               {apiType === 'tv' && details && details.seasons && details.seasons.filter(s => s.season_number > 0).length > 0 && (
-                <div style={{ marginTop: '50px', padding: '30px', background: 'rgba(10,10,10,0.8)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 10px 40px rgba(0,0,0,0.5)', backdropFilter: 'blur(15px)' }}>
+                <div style={{ marginTop: '50px', padding: '30px', background: 'rgba(15,15,15,0.9)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 15px 40px rgba(0,0,0,0.8)', backdropFilter: 'blur(15px)' }}>
                   <h2 style={{fontSize: '28px', borderLeft: '4px solid #FFD700', paddingLeft: '15px', color: '#fff', margin: '0 0 20px 0', textShadow: '0 2px 5px rgba(0,0,0,0.8)'}}>Seasons & Episodes</h2>
                   
                   <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '20px' }}>
@@ -709,7 +718,7 @@
                             <strong style={{ fontSize: '18px', color: '#fff' }}>{ep.episode_number}. {ep.name}</strong>
                             <p style={{ fontSize: '14px', color: '#aaa', margin: '8px 0', lineHeight: '1.5' }}>{(ep.overview || "No description available.").substring(0, 180)}...</p>
                           </div>
-                          <div style={{ padding: '10px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '140px' }}>
+                          <div style={{ padding: '10px 15px', border: `1px solid ${epRData.col}`, background: epRData.bg, color: epRData.col, borderRadius: '8px', textAlign: 'center', minWidth: '140px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
                             <div style={{ fontWeight: 'bold', fontSize: '22px' }}>{epRating}</div>
                             <div style={{ fontSize: '11px', letterSpacing: '1px', marginTop: '4px' }}>{epRData.cat}</div>
                           </div>
@@ -766,11 +775,11 @@
           <div style={{ padding: '100px 5% 40px', maxWidth: '1200px', margin: '0 auto', minHeight: '80vh' }}>
             <button onClick={() => nav('/')} className="nav-btn" style={{ marginBottom: '30px', fontSize: '16px', background: 'rgba(255,255,255,0.1)', padding: '8px 15px', borderRadius: '20px' }}>← Back</button>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
-              <img src={person.profile_path ? PROFILE_URL + person.profile_path : 'https://via.placeholder.com/300x450?text=No+Photo'} style={{ width: '100%', maxWidth: '300px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 40px rgba(0,0,0,0.6)' }} />
+              <img src={person.profile_path ? PROFILE_URL + person.profile_path : 'https://via.placeholder.com/300x450?text=No+Photo'} style={{ width: '100%', maxWidth: '300px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 20px 50px rgba(0,0,0,0.8)' }} />
               <div style={{ flex: 1, minWidth: '300px' }}>
-                <h1 style={{ fontSize: '42px', margin: '0 0 10px 0', fontWeight: '800' }}>{person.name}</h1>
+                <h1 style={{ fontSize: '48px', margin: '0 0 10px 0', fontWeight: '900', textShadow: '0 5px 15px rgba(0,0,0,1)' }}>{person.name}</h1>
                 <p style={{ color: '#FFD700', fontSize: '18px', fontWeight: 'bold' }}>{person.known_for_department}</p>
-                <h3 style={{fontSize: '20px', borderBottom: '1px solid #333', paddingBottom: '10px', marginTop: '30px'}}>Biography</h3>
+                <h3 style={{fontSize: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', marginTop: '30px'}}>Biography</h3>
                 <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#ccc' }}>{person.biography || "Biography not available."}</p>
               </div>
             </div>
@@ -781,7 +790,7 @@
 
       const GridView = ({ title, items, emptyMsg }) => (
         <div style={{ paddingTop: '100px', minHeight: '80vh' }}>
-          <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px' }}>{title}</h2>
+          <h2 style={{ fontSize: '24px', margin: '0 0 15px 5%', fontWeight: '700', borderLeft: '4px solid #FFD700', paddingLeft: '10px', textShadow: '0 2px 5px rgba(0,0,0,0.8)' }}>{title}</h2>
           {items.length === 0 ? <p style={{ marginLeft: '5%', color: '#888' }}>{emptyMsg}</p> : 
             <div className="media-grid">
               {items.map(item => {
@@ -789,11 +798,13 @@
                 const r = isPerson ? {bg: '#222', col: '#FFD700'} : getRatingData(item.rating, item.votes);
                 return (
                   <div key={item.id} className="media-card" onClick={() => isPerson ? nav('/person', item.id) : nav('/detail', item)}>
-                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', background: r.bg, border: `1px solid ${r.col}50`, color: r.col, padding: '4px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', zIndex: 2, display: 'flex', alignItems: 'center', gap: '4px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>
                       {isPerson ? <><StarIcon/> PROFILE</> : item.rating}
                     </div>
                     <img src={item.image} />
-                    <div style={{ padding: '15px' }}><h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</h3><p style={{ margin: 0, color: '#888', fontSize: '12px' }}>{item.year}</p></div>
+                    <div style={{ padding: '15px' }}>
+                      <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>{item.title}</h3><p style={{ margin: 0, color: '#aaa', fontSize: '12px' }}>{item.year}</p>
+                    </div>
                   </div>
                 );
               })}
@@ -810,11 +821,11 @@
             <h1 style={{ fontSize: '48px', fontWeight: '900', letterSpacing: '2px', margin: '0 0 10px 0', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
               THE VISION BEHIND 35<span style={{color: '#FFD700'}}>MM</span>
             </h1>
-            <div style={{ width: '80px', height: '4px', background: '#FFD700', margin: '0 auto' }}></div>
+            <div style={{ width: '80px', height: '4px', background: '#FFD700', margin: '0 auto', boxShadow: '0 0 10px #FFD700' }}></div>
           </div>
           
-          <div style={{ background: '#111', padding: '50px', borderRadius: '16px', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.8)' }}>
-            <h2 style={{ color: '#FFD700', fontSize: '32px', marginTop: 0, borderBottom: '1px solid #333', paddingBottom: '15px' }}>The Creator</h2>
+          <div style={{ background: 'linear-gradient(180deg, rgba(20,20,20,0.9) 0%, rgba(10,10,10,0.9) 100%)', padding: '50px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 50px rgba(0,0,0,0.8)' }}>
+            <h2 style={{ color: '#FFD700', fontSize: '32px', marginTop: 0, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '15px', textShadow: '0 2px 5px rgba(0,0,0,0.5)' }}>The Creator</h2>
             <h3 style={{ fontSize: '26px', margin: '20px 0 10px 0', fontWeight: '800' }}>Tanvir Hossain</h3>
             <p style={{ color: '#ccc', fontSize: '18px', lineHeight: '1.8', marginBottom: '40px' }}>
               Tanvir Hossain is an aspiring story and screenplay writer, and a visionary director in the making. 
@@ -823,7 +834,7 @@
               His love for films drove him to create a platform that honors the art of filmmaking.
             </p>
 
-            <h2 style={{ color: '#FFD700', fontSize: '32px', borderBottom: '1px solid #333', paddingBottom: '15px' }}>What is 35 MM?</h2>
+            <h2 style={{ color: '#FFD700', fontSize: '32px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '15px', textShadow: '0 2px 5px rgba(0,0,0,0.5)' }}>What is 35 MM?</h2>
             <p style={{ color: '#ccc', fontSize: '18px', lineHeight: '1.8', marginTop: '20px' }}>
               35 MM is not just another movie database—it is a premium, curated cinematic platform built specifically for true cinephiles. 
               Tired of confusing and biased rating systems on the internet, Tanvir engineered a <strong>Custom 10-Point Rating Engine</strong> that 
@@ -880,8 +891,8 @@
 
           <LoginModal />
           
-          <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9), transparent)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.8)' }} onClick={() => nav('/about')}>
+          <nav style={{ padding: '20px 5%', background: 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 70%, transparent 100%)', position: 'absolute', width: '100%', top: 0, zIndex: 100, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: '32px', fontWeight: '900', letterSpacing: '3px', cursor: 'pointer', color: '#fff', textShadow: '0 5px 15px rgba(0,0,0,0.8)' }} onClick={() => nav('/about')}>
               35<span style={{color: '#FFD700'}}>MM</span>
             </div>
             
@@ -892,11 +903,11 @@
                 <button onClick={() => nav('/watchlist')} className="nav-btn" style={{color: '#FFD700'}}><PlusIcon /> My List</button>
                 
                 {user ? (
-                  <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', border: '2px solid #FFD700', borderRadius: '50%', padding: '2px' }} onClick={() => { if(window.confirm('Sign out?')) { localStorage.removeItem('35mm_user'); setUser(null); } }} title="Sign Out">
+                  <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', border: '2px solid #FFD700', borderRadius: '50%', padding: '2px', boxShadow: '0 0 10px rgba(255,215,0,0.5)' }} onClick={() => { if(window.confirm('Sign out?')) { localStorage.removeItem('35mm_user'); setUser(null); } }} title="Sign Out">
                     <img src="https://ui-avatars.com/api/?name=Tanvir+Hossain&background=FFD700&color=000&bold=true" style={{ width: '32px', borderRadius: '50%' }} alt="User" />
                   </div>
                 ) : (
-                  <button onClick={() => setShowLogin(true)} className="nav-btn" style={{color: '#000', background: '#FFD700', padding: '6px 15px', borderRadius: '20px'}}>Sign In</button>
+                  <button onClick={() => setShowLogin(true)} className="nav-btn" style={{color: '#000', background: '#FFD700', padding: '8px 18px', borderRadius: '30px', boxShadow: '0 4px 15px rgba(255,215,0,0.3)'}}>Sign In</button>
                 )}
               </div>
             </div>
@@ -904,12 +915,12 @@
 
           <div style={{ flex: 1 }}><View /></div>
           
-          <footer style={{ textAlign: 'center', padding: '40px 20px', background: '#050505', borderTop: '1px solid #1a1a1a', marginTop: '40px' }}>
-            <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0', color: '#fff', fontWeight: '900', cursor: 'pointer' }} onClick={() => nav('/about')}>
+          <footer style={{ textAlign: 'center', padding: '40px 20px', background: 'linear-gradient(to top, #000 0%, transparent 100%)', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '40px' }}>
+            <h2 style={{ letterSpacing: '3px', margin: '0 0 10px 0', color: '#fff', fontWeight: '900', cursor: 'pointer', textShadow: '0 2px 5px rgba(0,0,0,0.5)' }} onClick={() => nav('/about')}>
               35<span style={{color: '#FFD700'}}>MM</span>
             </h2>
-            <p style={{ color: '#666', fontSize: '14px', margin: '0' }}>Powered by TMDB API • Custom Rated</p>
-            <p style={{ color: '#444', fontSize: '12px', marginTop: '20px' }}>© 2026 TANVIR HOSSAIN. All Rights Reserved.</p>
+            <p style={{ color: '#888', fontSize: '14px', margin: '0' }}>Powered by TMDB API • Custom Rated</p>
+            <p style={{ color: '#555', fontSize: '12px', marginTop: '20px' }}>© 2026 TANVIR HOSSAIN. All Rights Reserved.</p>
           </footer>
         </div>
       );
